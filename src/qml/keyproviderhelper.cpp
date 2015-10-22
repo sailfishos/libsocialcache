@@ -26,6 +26,7 @@ KeyProviderHelper::KeyProviderHelper(QObject *parent)
     , m_triedLoadingTwitter(false)
     , m_triedLoadingOneDrive(false)
     , m_triedLoadingDropbox(false)
+    , m_triedLoadingVk(false)
 {
 }
 
@@ -88,6 +89,15 @@ QString KeyProviderHelper::oneDriveClientId()
     return m_oneDriveClientId;
 }
 
+QString KeyProviderHelper::vkClientId()
+{
+    if (!m_triedLoadingVk) {
+        loadVk();
+    }
+
+    return m_vkClientId;
+}
+
 void KeyProviderHelper::loadFacebook()
 {
     m_triedLoadingFacebook = true;
@@ -131,5 +141,19 @@ void KeyProviderHelper::loadOneDrive()
     }
 
     m_oneDriveClientId = QLatin1String(cClientId);
+    free(cClientId);
+}
+
+void KeyProviderHelper::loadVk()
+{
+    m_triedLoadingVk = true;
+    char *cClientId = NULL;
+    int cSuccess = SailfishKeyProvider_storedKey("vk", "vk-sync", "client_id",
+                                                 &cClientId);
+    if (cSuccess != 0 || cClientId == NULL) {
+        return;
+    }
+
+    m_vkClientId = QLatin1String(cClientId);
     free(cClientId);
 }

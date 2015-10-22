@@ -45,7 +45,8 @@ public:
         Thumbnail,
         Image,
         Count,
-        MimeType
+        MimeType,
+        ImageSource
     };
 
     enum ModelDataType {
