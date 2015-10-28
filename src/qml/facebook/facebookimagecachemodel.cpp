@@ -240,6 +240,9 @@ void FacebookImageCacheModel::imageDownloaded(
     case FacebookImageDownloader::FullImage:
         d->m_data[row].insert(FacebookImageCacheModel::Image, path);
         break;
+    default:
+        qWarning() << Q_FUNC_INFO << "invalid downloader type: " << type;
+        break;
     }
 
     emit dataChanged(index(row), index(row));

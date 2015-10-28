@@ -176,6 +176,41 @@ void VKImageCacheModel::setDownloader(VKImageDownloader *downloader)
     }
 }
 
+void VKImageCacheModel::removeImage(const QString &imageId)
+{
+    Q_D(VKImageCacheModel);
+
+    int row = -1;
+    for (int i = 0; i < count(); ++i) {
+        QString dbId = data(index(i), VKImageCacheModel::PhotoId).toString();
+        if (dbId == imageId) {
+            row = i;
+            break;
+        }
+    }
+
+    if (row >= 0) {
+        beginRemoveRows(QModelIndex(), row, row);
+        d->m_data.removeAt(row);
+        endRemoveRows();
+
+        // Update album image count
+        VKImage::ConstPtr image = d->database.image(imageId);
+        if (image) {
+            VKAlbum::ConstPtr album = d->database.album(image->albumId());
+            if (album) {
+                d->database.addAlbum(VKAlbum::create(album->id(), album->ownerId(), album->title(),
+                                                     album->description(), album->thumbSrc(),
+                                                     album->thumbFile(), album->size()-1, album->created(),
+                                                     album->updated(), album->accountId()));
+            }
+
+            d->database.removeImage(image);
+            d->database.commit();
+        }
+    }
+}
+
 QVariant VKImageCacheModel::data(const QModelIndex &index, int role) const
 {
     Q_D(const VKImageCacheModel);
@@ -242,6 +277,9 @@ void VKImageCacheModel::imageDownloaded(const QString &url, const QString &path,
     switch (type) {
     case VKImageDownloader::ThumbnailImage:
         d->m_data[row].insert(VKImageCacheModel::Thumbnail, path);
+        break;
+    default:
+        qWarning() << Q_FUNC_INFO << "invalid downloader type: " << type;
         break;
     }
 

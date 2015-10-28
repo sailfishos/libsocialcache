@@ -170,7 +170,9 @@ public:
     // methods to perform synchronous queries. For use by sync adapters only!
     VKUser::ConstPtr user(int accountId) const;
     VKAlbum::ConstPtr album(int accountId, const QString &vkUserId, const QString &vkAlbumId) const;
+    VKAlbum::ConstPtr album(const QString &vkAlbumId) const;
     VKImage::ConstPtr image(int accountId, const QString &vkUserId, const QString &vkAlbumId, const QString &vkImageId) const;
+    VKImage::ConstPtr image(const QString &vkImageId) const;
     QList<VKAlbum::ConstPtr> albums(int accountId, const QString &vkUserId) const;
     QList<VKImage::ConstPtr> images(int accountId, const QString &vkUserId, const QString &vkAlbumId) const;
 

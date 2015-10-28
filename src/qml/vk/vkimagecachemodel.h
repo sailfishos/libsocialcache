@@ -74,6 +74,7 @@ public:
     // since VK doens't use globally-unique identifiers, we need to encode breadcrumb information into the node identifier.
     Q_INVOKABLE QString constructNodeIdentifier(int accountId, const QString &user_id, const QString &album_id, const QString &photo_id);
     Q_INVOKABLE QVariantMap parseNodeIdentifier(const QString &nid) const; // { "accountId"=int, "user_id"=string, "album_id"=string, "photo_id"=string }
+    Q_INVOKABLE void removeImage(const QString &imageId);
 
 public Q_SLOTS:
     void loadImages();
