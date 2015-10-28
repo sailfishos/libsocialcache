@@ -214,6 +214,13 @@ void OneDriveImageCacheModel::imageDownloaded(
 {
     Q_D(OneDriveImageCacheModel);
 
+    if (path.isEmpty()) {
+        // empty path signifies an error, which we don't handle here at the moment.
+        // Return, otherwise dataChanged signal would cause UI to read back
+        // related value, which, being empty, would trigger another download request,
+        // potentially causing never ending loop.
+        return;
+    }
 
     int row = -1;
     QString id = imageData.value(IDENTIFIER_KEY).toString();
