@@ -245,6 +245,14 @@ void VKImageCacheModel::imageDownloaded(const QString &url, const QString &path,
 {
     Q_D(VKImageCacheModel);
 
+    if (path.isEmpty()) {
+        // empty path signifies an error, which we don't handle here at the moment.
+        // Return, otherwise dataChanged signal would cause UI to read back
+        // related value, which, being empty, would trigger another download request,
+        // potentially causing never ending loop.
+        return;
+    }
+
     int row = imageData.value(ROW_KEY).toInt();
     if (row < 0 || row >= d->m_data.count()) {
         qWarning() << Q_FUNC_INFO
