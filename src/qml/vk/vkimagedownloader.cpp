@@ -117,9 +117,6 @@ void VKImageDownloader::dbQueueImage(const QString &url, const QVariantMap &data
     case ThumbnailImage:
         d->database.updateImageThumbnail(image, file);
         break;
-    case FullImage:
-        d->database.updateImageFile(image, file);
-        break;
     }
 }
 

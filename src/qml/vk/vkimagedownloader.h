@@ -32,8 +32,7 @@ class VKImageDownloader : public AbstractImageDownloader
     Q_OBJECT
 public:
     enum ImageType {
-        ThumbnailImage,
-        FullImage
+        ThumbnailImage
     };
 
     explicit VKImageDownloader(QObject *parent = 0);

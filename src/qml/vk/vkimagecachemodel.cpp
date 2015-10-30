@@ -119,6 +119,7 @@ QHash<int, QByteArray> VKImageCacheModel::roleNames() const
     roleNames.insert(Image, "image");
     roleNames.insert(Count, "dataCount");
     roleNames.insert(MimeType, "mimeType");
+    roleNames.insert(ImageSource, "imageSource");
     return roleNames;
 }
 
@@ -175,28 +176,47 @@ void VKImageCacheModel::setDownloader(VKImageDownloader *downloader)
     }
 }
 
+void VKImageCacheModel::removeImage(const QString &imageId)
+{
+    Q_D(VKImageCacheModel);
+
+    int row = -1;
+    for (int i = 0; i < count(); ++i) {
+        QString dbId = data(index(i), VKImageCacheModel::PhotoId).toString();
+        if (dbId == imageId) {
+            row = i;
+            break;
+        }
+    }
+
+    if (row >= 0) {
+        beginRemoveRows(QModelIndex(), row, row);
+        d->m_data.removeAt(row);
+        endRemoveRows();
+
+        // Update album image count
+        VKImage::ConstPtr image = d->database.image(imageId);
+        if (image) {
+            VKAlbum::ConstPtr album = d->database.album(image->albumId());
+            if (album) {
+                d->database.addAlbum(VKAlbum::create(album->id(), album->ownerId(), album->title(),
+                                                     album->description(), album->thumbSrc(),
+                                                     album->thumbFile(), album->size()-1, album->created(),
+                                                     album->updated(), album->accountId()));
+            }
+
+            d->database.removeImage(image);
+            d->database.commit();
+        }
+    }
+}
+
 QVariant VKImageCacheModel::data(const QModelIndex &index, int role) const
 {
     Q_D(const VKImageCacheModel);
     int row = index.row();
     if (row < 0 || row >= d->m_data.count()) {
         return QVariant();
-    }
-
-    if (role == VKImageCacheModel::Image) {
-        if (d->m_data.at(row).value(role).toString().isEmpty()) {
-            // haven't downloaded the image yet.  Download it.
-            if (d->database.images().size() > row) {
-                VKImage::ConstPtr imageData = d->database.images().at(row);
-                VKImageCacheModelPrivate *nonconstD = const_cast<VKImageCacheModelPrivate*>(d);
-                nonconstD->queue(row, VKImageDownloader::FullImage,
-                                 imageData->accountId(),
-                                 imageData->ownerId(),
-                                 imageData->albumId(),
-                                 imageData->id(),
-                                 imageData->photoSrc());
-            }
-        }
     }
 
     return d->m_data.at(row).value(role);
@@ -266,8 +286,8 @@ void VKImageCacheModel::imageDownloaded(const QString &url, const QString &path,
     case VKImageDownloader::ThumbnailImage:
         d->m_data[row].insert(VKImageCacheModel::Thumbnail, path);
         break;
-    case VKImageDownloader::FullImage:
-        d->m_data[row].insert(VKImageCacheModel::Image, path);
+    default:
+        qWarning() << Q_FUNC_INFO << "invalid downloader type: " << type;
         break;
     }
 
@@ -306,18 +326,15 @@ void VKImageCacheModel::queryFinished()
             //% "All"
             userMap.insert(VKImageCacheModel::Text, qtTrId("nemo_socialcache_VK_images_model-all-users"));
             userMap.insert(VKImageCacheModel::Count, count);
+            userMap.insert(VKImageCacheModel::AccountId, 0);
             data.prepend(userMap);
         }
         break;
     }
     case Albums: {
         QList<VKAlbum::ConstPtr> albumsData = d->database.albums();
-        QString vkUserId;
-        int accountId = 0;
         Q_FOREACH (const VKAlbum::ConstPtr &albumData, albumsData) {
             QMap<int, QVariant> albumMap;
-            vkUserId = albumData->ownerId();    // remember user id for 'All' album
-            accountId = albumData->accountId(); // and remember accountId also.
             albumMap.insert(VKImageCacheModel::AlbumId, albumData->id());
             albumMap.insert(VKImageCacheModel::Text, albumData->title());
             albumMap.insert(VKImageCacheModel::Count, albumData->size());
@@ -327,6 +344,8 @@ void VKImageCacheModel::queryFinished()
         }
 
         if (data.count() > 1) {
+            QVariantMap parsedNodeIdentifier = parseNodeIdentifier(d->nodeIdentifier);
+
             QMap<int, QVariant> albumMap;
             int count = 0;
             Q_FOREACH (const VKAlbum::ConstPtr &albumData, albumsData) {
@@ -334,13 +353,12 @@ void VKImageCacheModel::queryFinished()
             }
 
             albumMap.insert(VKImageCacheModel::AlbumId, QString());
-            // albumMap.insert(VKImageCacheModel::Icon, QString());
             //:  Label for the "show all photos from all albums by this user" option
             //% "All"
             albumMap.insert(VKImageCacheModel::Text, qtTrId("nemo_socialcache_VK_images_model-all-albums"));
             albumMap.insert(VKImageCacheModel::Count, count);
-            albumMap.insert(VKImageCacheModel::UserId, vkUserId);
-            albumMap.insert(VKImageCacheModel::AccountId, accountId);
+            albumMap.insert(VKImageCacheModel::UserId, parsedNodeIdentifier.value("user_id").toString());
+            albumMap.insert(VKImageCacheModel::AccountId, parsedNodeIdentifier.value("accountId").toInt());
             data.prepend(albumMap);
         }
         break;
@@ -374,6 +392,7 @@ void VKImageCacheModel::queryFinished()
             imageMap.insert(VKImageCacheModel::Width, imageData->width());
             imageMap.insert(VKImageCacheModel::Height, imageData->height());
             imageMap.insert(VKImageCacheModel::MimeType, QLatin1String("image/jpeg"));
+            imageMap.insert(VKImageCacheModel::ImageSource, imageData->photoSrc());
             data.append(imageMap);
         }
         break;

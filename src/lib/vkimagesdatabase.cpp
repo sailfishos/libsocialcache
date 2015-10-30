@@ -554,6 +554,8 @@ QList<VKAlbum::ConstPtr> VKImagesDatabasePrivate::queryAlbums(int accountId, con
                 queryString.append(QStringLiteral("AND vkAlbumId = :vkAlbumId "));
             }
         }
+    } else if (!vkAlbumId.isEmpty()) {
+        queryString.append(QStringLiteral("WHERE vkAlbumId = :vkAlbumId "));
     }
     queryString.append(QStringLiteral("ORDER BY vkOwnerId DESC, created ASC"));
 
@@ -566,6 +568,8 @@ QList<VKAlbum::ConstPtr> VKImagesDatabasePrivate::queryAlbums(int accountId, con
                 query.bindValue(":vkAlbumId", vkAlbumId);
             }
         }
+    } else if (!vkAlbumId.isEmpty()) {
+        query.bindValue(":vkAlbumId", vkAlbumId);
     }
     if (!query.exec()) {
         qWarning() << Q_FUNC_INFO << "Failed to query albums:" << query.lastError().text();
@@ -614,6 +618,8 @@ QList<VKImage::ConstPtr> VKImagesDatabasePrivate::queryImages(int accountId,
                 }
             }
         }
+    } else if (!vkImageId.isEmpty()) {
+        queryString.append(QLatin1String("WHERE vkImageId = :vkImageId "));
     }
     queryString.append(QLatin1String("ORDER BY date ASC"));
     QSqlQuery query = q_func()->prepare(queryString);
@@ -628,6 +634,8 @@ QList<VKImage::ConstPtr> VKImagesDatabasePrivate::queryImages(int accountId,
                 }
             }
         }
+    } else if (!vkImageId.isEmpty()) {
+        query.bindValue(":vkImageId", vkImageId);
     }
 
     if (!query.exec()) {
@@ -783,6 +791,20 @@ VKAlbum::ConstPtr VKImagesDatabase::album(int accountId, const QString &vkUserId
     return albums[0];
 }
 
+VKAlbum::ConstPtr VKImagesDatabase::album(const QString &vkAlbumId) const
+{
+    Q_D(const VKImagesDatabase);
+    QList<VKAlbum::ConstPtr> albums = d->queryAlbums(0, QString(), vkAlbumId);
+    if (albums.size() == 0) {
+        qWarning() << Q_FUNC_INFO << "No album in database for: " << vkAlbumId;
+        return VKAlbum::Ptr();
+    } else if (albums.size() > 1) {
+        qWarning() << Q_FUNC_INFO << "Multiple albums in database for: " << vkAlbumId;
+        // shouldn't happen, but return the first one anyway.
+    }
+    return albums[0];
+}
+
 VKImage::ConstPtr VKImagesDatabase::image(int accountId, const QString &vkUserId, const QString &vkAlbumId, const QString &vkImageId) const
 {
     Q_D(const VKImagesDatabase);
@@ -792,6 +814,20 @@ VKImage::ConstPtr VKImagesDatabase::image(int accountId, const QString &vkUserId
         return VKImage::Ptr();
     } else if (images.size() > 1) {
         qWarning() << Q_FUNC_INFO << "Multiple images in database for account:" << accountId << "user:" << vkUserId << "album:" << vkAlbumId << "image:" << vkImageId;
+        // shouldn't happen, but return the first one anyway.
+    }
+    return images[0];
+}
+
+VKImage::ConstPtr VKImagesDatabase::image(const QString &vkImageId) const
+{
+    Q_D(const VKImagesDatabase);
+    QList<VKImage::ConstPtr> images = d->queryImages(0, QString(), QString(), vkImageId);
+    if (images.size() == 0) {
+        qWarning() << Q_FUNC_INFO << "No VK image found for:" << vkImageId;
+        return VKImage::Ptr();
+    } else if (images.size() > 1) {
+        qWarning() << Q_FUNC_INFO << "Multiple images in database for vkImageId: " << vkImageId;
         // shouldn't happen, but return the first one anyway.
     }
     return images[0];

@@ -276,6 +276,9 @@ void DropboxImageCacheModel::imageDownloaded(
     case DropboxImageDownloader::ThumbnailImage:
         d->m_data[row].insert(DropboxImageCacheModel::Thumbnail, path);
         break;
+    default:
+        qWarning() << Q_FUNC_INFO << "invalid downloader type: " << type;
+        break;
     }
 
     emit dataChanged(index(row), index(row));
