@@ -114,12 +114,14 @@ void SyncHelper::slotSyncStatus(const QString &aProfileId, int aStatus,
         setLoading(true);
     }
 }
+
 void SyncHelper::slotProfileChanged(QString aProfileId, int aChangeType, QString aChangedProfile)
 {
     Q_UNUSED(aChangedProfile);
 
-    if (aChangeType == Buteo::ProfileManager::PROFILE_REMOVED) {
-        if (profileIdMatches(aProfileId)) {
+    if (profileIdMatches(aProfileId)) {
+        refreshSyncProfiles();
+        if (aChangeType == Buteo::ProfileManager::PROFILE_REMOVED) {
             emit profileDeleted();
         }
     }
@@ -136,6 +138,7 @@ void SyncHelper::refreshSyncProfiles()
     if (!m_complete) {
         return;
     }
+
     QStringList syncProfiles;
     Q_FOREACH (const QString &profileId, m_interface->syncProfilesByType("sync")) {
         if (profileIdMatches(profileId)) {
