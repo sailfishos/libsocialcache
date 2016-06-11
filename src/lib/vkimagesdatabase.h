@@ -23,6 +23,7 @@
 #include "abstractsocialcachedatabase_p.h"
 #include <QtCore/QDateTime>
 #include <QtCore/QStringList>
+#include <QtCore/QSharedPointer>
 
 class VKUserPrivate;
 class VKUser
