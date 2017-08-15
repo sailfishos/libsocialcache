@@ -71,7 +71,6 @@ rm -rf %{buildroot}
 
 %post
 /sbin/ldconfig
-rm -rf /home/nemo/.local/share/system/privileged/Calendars/
 
 %postun
 /sbin/ldconfig
