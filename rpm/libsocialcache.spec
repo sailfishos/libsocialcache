@@ -4,7 +4,7 @@ Version:    0.0.48
 Release:    1
 Group:      Applications/Multimedia
 License:    LGPLv2.1
-URL:        https://github.com/nemomobile/libsocialcache
+URL:        https://git.merproject.org/mer-core/libsocialcache
 Source0:    %{name}-%{version}.tar.bz2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Gui)
@@ -20,7 +20,7 @@ BuildRequires:  pkgconfig(libsailfishkeyprovider)
 Requires:  qt5-plugin-sqldriver-sqlite
 
 %description
-libsocialcache is a  library that manages data from social
+libsocialcache is a library that manages data from social
 networks. It also provides higher level models with a QML
 plugin.
 
@@ -71,7 +71,6 @@ rm -rf %{buildroot}
 
 %post
 /sbin/ldconfig
-rm -rf /home/nemo/.local/share/system/privileged/Calendars/
 
 %postun
 /sbin/ldconfig
