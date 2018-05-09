@@ -69,13 +69,16 @@ SOURCES += plugin.cpp \
     vk/vkimagedownloader.cpp \
     vk/vkpostsmodel.cpp
 
-OTHER_FILES += qmldir
-import.files = qmldir
+OTHER_FILES += qmldir plugins.qmltypes
+import.files = qmldir plugins.qmltypes
 
 import.path = $$TARGETPATH
 target.path = $$TARGETPATH
 
 INSTALLS += target import
+
+qmltypes.commands = qmlplugindump -nonrelocatable org.nemomobile.socialcache 1.0 > $$PWD/plugins.qmltypes
+QMAKE_EXTRA_TARGETS += qmltypes
 
 # translations
 TS_FILE = $$OUT_PWD/socialcache.ts

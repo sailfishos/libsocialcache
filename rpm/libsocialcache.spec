@@ -90,6 +90,7 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/socialcache.pc
 
 %files qml-plugin
+%{_libdir}/qt5/qml/org/nemomobile/socialcache/plugins.qmltypes
 %{_libdir}/qt5/qml/org/nemomobile/socialcache/qmldir
 %{_libdir}/qt5/qml/org/nemomobile/socialcache/libsocialcacheqml.so
 %{_datadir}/translations/socialcache_eng_en.qm
