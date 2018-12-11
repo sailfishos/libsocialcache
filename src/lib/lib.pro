@@ -3,7 +3,6 @@ include(../../common.pri)
 TEMPLATE = lib
 CONFIG += qt create_prl no_install_prl create_pc link_pkgconfig
 QT += sql
-VERSION = 0.0.49
 
 isEmpty(PREFIX) {
     PREFIX=/usr
@@ -63,6 +62,7 @@ QMAKE_PKGCONFIG_DESCRIPTION = Social cache development files
 QMAKE_PKGCONFIG_LIBDIR = $$target.path
 QMAKE_PKGCONFIG_INCDIR = $$headers.path
 QMAKE_PKGCONFIG_DESTDIR = pkgconfig
+QMAKE_PKGCONFIG_VERSION = $$VERSION
 
 INSTALLS += target headers
 
