@@ -3,8 +3,8 @@ Summary:    A library that manages data from social networks
 Version:    0.0.48
 Release:    1
 Group:      Applications/Multimedia
-License:    LGPLv2.1
-URL:        https://git.merproject.org/mer-core/libsocialcache
+License:    BSD and LGPLv2+
+URL:        https://git.sailfishos.org/mer-core/libsocialcache
 Source0:    %{name}-%{version}.tar.bz2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Gui)
@@ -26,15 +26,12 @@ plugin.
 
 %package qml-plugin-ts-devel
 Summary:   Translation source for libsocialcache
-License:   LGPLv2.1
-Group:     Applications/Multimedia
 
 %description qml-plugin-ts-devel
 Translation source for socialcache qml plugin
 
 %package devel
 Summary:   Development files for libsocialcache
-License:   LGPLv2.1
 Group:     Development/Libraries
 Requires:  libsocialcache = %{version}
 
@@ -43,8 +40,6 @@ This package contains development files for libsocialcache.
 
 %package qml-plugin
 Summary:   QML plugin for libsocialcache
-License:   LGPLv2.1
-Group:     Applications/Multimedia
 
 %description qml-plugin
 This package contains the qml plugin for socialcache
@@ -52,6 +47,7 @@ This package contains the qml plugin for socialcache
 %package tests
 Summary:    Unit tests for libsocialcache
 Group:      System/Libraries
+License:    BSD
 BuildRequires:  pkgconfig(Qt5Test)
 Requires:   %{name} = %{version}-%{release}
 
@@ -78,6 +74,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %{_libdir}/libsocialcache.so.*
+%license COPYING
 
 %files qml-plugin-ts-devel
 %defattr(-,root,root,-)
@@ -97,4 +94,4 @@ rm -rf %{buildroot}
 
 %files tests
 %defattr(-,root,root,-)
-/opt/tests/libsocialcache/*
+/opt/tests/libsocialcache/
