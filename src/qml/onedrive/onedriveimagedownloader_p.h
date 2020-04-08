@@ -40,9 +40,7 @@ public:
     OneDriveImagesDatabase database;
     QSet<OneDriveImageCacheModel*> m_connectedModels;
     QMutex m_cacheMutex;
-    QMap<QString, OneDriveImageDownloader::UncachedImage> m_uncachedImages;
-    QMap<QString, int> m_ongoingAlbumrequests;
-    QList<int> m_accountsWaitingForAccessToken;
+    QMap<int, QString> m_accessTokens;
     int m_optimalThumbnailSize;
     QMap<QString, QMap<QNetworkReply*, QTimer *> > m_networkReplyTimeouts;
 

@@ -227,7 +227,7 @@ Module {
             Parameter { name: "accountId"; type: "int" }
         }
         Method {
-            name: "accessTokenRetrived"
+            name: "accessTokenRetrieved"
             Parameter { name: "accessToken"; type: "string" }
             Parameter { name: "accountId"; type: "int" }
         }

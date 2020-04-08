@@ -78,16 +78,19 @@ QHash<int, QByteArray> OneDriveImageCacheModel::roleNames() const
 {
     QHash<int, QByteArray> roleNames;
     roleNames.insert(OneDriveId, "id");
+    roleNames.insert(AlbumId, "albumId");
+    roleNames.insert(UserId, "userId");
+    roleNames.insert(AccountId, "accountId");
     roleNames.insert(Thumbnail, "thumbnail");
+    roleNames.insert(ThumbnailUrl, "thumbnailUrl");
     roleNames.insert(Image, "image");
+    roleNames.insert(ImageUrl, "imageUrl");
     roleNames.insert(Title, "title");
     roleNames.insert(DateTaken, "dateTaken");
     roleNames.insert(Width, "photoWidth");
     roleNames.insert(Height, "photoHeight");
     roleNames.insert(Count, "dataCount");
     roleNames.insert(MimeType, "mimeType");
-    roleNames.insert(AccountId, "accountId");
-    roleNames.insert(UserId, "userId");
     roleNames.insert(Description, "description");
     return roleNames;
 }
@@ -170,7 +173,35 @@ QVariant OneDriveImageCacheModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    return d->m_data.at(row).value(role);
+    const QVariant value = d->m_data.at(row).value(role);
+
+    switch (role) {
+        case Thumbnail: {
+            const QString thumbnailUrl = d->m_data.at(row).value(ThumbnailUrl).toString();
+            if (value.toString().isEmpty() && !thumbnailUrl.isEmpty()) {
+                QList<OneDriveImageDownloader::UncachedImage> missingThumbnails;
+                QVariantList modelPtrList;
+                modelPtrList.append(QVariant::fromValue<void*>((void*)this));
+                missingThumbnails.append(OneDriveImageDownloader::UncachedImage(
+                                                thumbnailUrl,
+                                                d->m_data.at(row).value(OneDriveId).toString(),
+                                                d->m_data.at(row).value(AlbumId).toString(),
+                                                d->m_data.at(row).value(AccountId).toInt(),
+                                                modelPtrList));
+                d->downloader->cacheImages(missingThumbnails);
+            }
+            break;
+        }
+        case Image: {
+            // this should never be hit.  we should always use the "cache" database
+            // which has "expiresIn" handling for automatically deleting cloud content
+            // after a certain amount of time.
+            break;
+        }
+        default: break;
+    }
+
+    return value;
 }
 
 void OneDriveImageCacheModel::loadImages()
@@ -252,8 +283,6 @@ void OneDriveImageCacheModel::queryFinished()
 {
     Q_D(OneDriveImageCacheModel);
 
-    QList<OneDriveImageDownloader::UncachedImage> missingThumbnails;
-
     SocialCacheModelData data;
     switch (d->type) {
     case Users: {
@@ -315,27 +344,22 @@ void OneDriveImageCacheModel::queryFinished()
     }
     case Images: {
         QList<OneDriveImage::ConstPtr> imagesData = d->database.images();
-        QVariantList modelPtrList;
-        modelPtrList.append(QVariant::fromValue<void*>((void*)this));
-
         for (int i = 0; i < imagesData.count(); i ++) {
             const OneDriveImage::ConstPtr & imageData = imagesData.at(i);
             QMap<int, QVariant> imageMap;
             imageMap.insert(OneDriveImageCacheModel::OneDriveId, imageData->imageId());
-            if (imageData->thumbnailFile().isEmpty()) {
-                missingThumbnails.append(OneDriveImageDownloader::UncachedImage(imageData->imageId(), imageData->albumId(),
-                                                                                imageData->accountId(), modelPtrList));
-            }
+            imageMap.insert(OneDriveImageCacheModel::AlbumId, imageData->albumId());
+            imageMap.insert(OneDriveImageCacheModel::UserId, imageData->userId());
+            imageMap.insert(OneDriveImageCacheModel::AccountId, imageData->accountId());
             imageMap.insert(OneDriveImageCacheModel::Thumbnail, imageData->thumbnailFile());
-            imageMap.insert(OneDriveImageCacheModel::Image, imageData->imageUrl());
+            imageMap.insert(OneDriveImageCacheModel::ThumbnailUrl, imageData->thumbnailUrl());
+            imageMap.insert(OneDriveImageCacheModel::Image, imageData->imageFile());
+            imageMap.insert(OneDriveImageCacheModel::ImageUrl, imageData->imageUrl());
             imageMap.insert(OneDriveImageCacheModel::Title, imageData->imageName());
             imageMap.insert(OneDriveImageCacheModel::DateTaken, imageData->createdTime());
             imageMap.insert(OneDriveImageCacheModel::Width, imageData->width());
             imageMap.insert(OneDriveImageCacheModel::Height, imageData->height());
-            imageMap.insert(OneDriveImageCacheModel::MimeType, QLatin1String("image/jpeg"));
-            imageMap.insert(OneDriveImageCacheModel::UserId, imageData->userId());
             imageMap.insert(OneDriveImageCacheModel::Description, imageData->description());
-            imageMap.insert(OneDriveImageCacheModel::AccountId, imageData->accountId());
             data.append(imageMap);
         }
         break;
@@ -345,9 +369,4 @@ void OneDriveImageCacheModel::queryFinished()
     }
 
     updateData(data);
-
-    // notify uncached thumbnails.
-    if (missingThumbnails.count() > 0) {
-        d->downloader->cacheImages(missingThumbnails);
-    }
 }
