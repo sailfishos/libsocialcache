@@ -38,16 +38,19 @@ class OneDriveImageCacheModel: public AbstractSocialCacheModel
 public:
     enum OneDriveGalleryRole {
         OneDriveId = 0,
+        AlbumId,
+        UserId,
+        AccountId,
         Thumbnail,
+        ThumbnailUrl,
         Image,
+        ImageUrl,
         Title,
         DateTaken,
         Width,
         Height,
         Count,
         MimeType,
-        AccountId,
-        UserId,
         Description
     };
 

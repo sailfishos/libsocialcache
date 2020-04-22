@@ -43,12 +43,14 @@ public:
 
     struct UncachedImage {
         UncachedImage();
-        UncachedImage(const QString &imageId,
+        UncachedImage(const QString &thumbnailUrl,
+                      const QString &imageId,
                       const QString &albumId,
                       int accountId,
                       QVariantList connectedModels);
         UncachedImage(const UncachedImage &other);
 
+        QString thumbnailUrl;
         QString imageId;
         QString albumId;
         int accountId;
@@ -67,7 +69,7 @@ public:
     int optimalThumbnailSize() const;
     void setOptimalThumbnailSize(int optimalThumbnailSize);
 
-    Q_INVOKABLE void accessTokenRetrived(const QString &accessToken, int accountId);
+    Q_INVOKABLE void accessTokenRetrieved(const QString &accessToken, int accountId);
     Q_INVOKABLE void accessTokenFailed(int accountId);
 
 signals:
@@ -83,9 +85,6 @@ protected:
 private:
     void requestImages(int accountId, const QString &accessToken,
                        const QString &albumId, const QString &nextRound = QString());
-    void clearRequests(const QString &albumId);
-    void setupReplyTimeout(const QString &albumId, QNetworkReply *reply);
-    void removeReplyTimeout(const QString &albumId, QNetworkReply *reply);
 
     struct ImageSource {
         ImageSource(int width, int height, const QString &sourceUrl) : width(width), height(height), sourceUrl(sourceUrl) {}
@@ -97,10 +96,6 @@ private:
 
 private Q_SLOTS:
     void invokeSpecificModelCallback(const QString &url, const QString &path, const QVariantMap &metadata);
-    void imagesFinishedHandler();
-    void errorHandler(QNetworkReply::NetworkError err);
-    void sslErrorsHandler(const QList<QSslError> &errs);
-    void timeoutReply();
 
 private:
     Q_DECLARE_PRIVATE(OneDriveImageDownloader)
