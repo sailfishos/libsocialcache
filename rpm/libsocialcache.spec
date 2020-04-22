@@ -1,6 +1,6 @@
 Name:       libsocialcache
 Summary:    A library that manages data from social networks
-Version:    0.0.48
+Version:    0.1.4
 Release:    1
 Group:      Applications/Multimedia
 License:    BSD and LGPLv2+
