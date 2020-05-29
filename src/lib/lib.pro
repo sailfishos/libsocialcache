@@ -9,7 +9,7 @@ isEmpty(PREFIX) {
 }
 
 TARGET = socialcache
-target.path = $$INSTALL_ROOT$$PREFIX/lib
+target.path = $$[QT_INSTALL_LIBS]
 
 HEADERS = \
     semaphore_p.h \
@@ -54,7 +54,7 @@ SOURCES = \
     vkimagesdatabase.cpp
 
 headers.files = $$HEADERS
-headers.path = /usr/include/socialcache
+headers.path = $$PREFIX/include/socialcache
 
 
 QMAKE_PKGCONFIG_NAME = lib$$TARGET

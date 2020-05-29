@@ -2,7 +2,6 @@ Name:       libsocialcache
 Summary:    A library that manages data from social networks
 Version:    0.1.4
 Release:    1
-Group:      Applications/Multimedia
 License:    BSD and LGPLv2+
 URL:        https://git.sailfishos.org/mer-core/libsocialcache
 Source0:    %{name}-%{version}.tar.bz2
@@ -32,7 +31,6 @@ Translation source for socialcache qml plugin
 
 %package devel
 Summary:   Development files for libsocialcache
-Group:     Development/Libraries
 Requires:  libsocialcache = %{version}
 
 %description devel
@@ -46,7 +44,6 @@ This package contains the qml plugin for socialcache
 
 %package tests
 Summary:    Unit tests for libsocialcache
-Group:      System/Libraries
 License:    BSD
 BuildRequires:  pkgconfig(Qt5Test)
 Requires:   %{name} = %{version}-%{release}
