@@ -1,6 +1,6 @@
 Name:       libsocialcache
 Summary:    A library that manages data from social networks
-Version:    0.1.4
+Version:    0.1.5
 Release:    1
 License:    BSD and LGPLv2+
 URL:        https://git.sailfishos.org/mer-core/libsocialcache
