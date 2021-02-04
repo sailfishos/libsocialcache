@@ -51,6 +51,7 @@ struct ImageInfo
 };
 
 
+class QMimeDatabase;
 class AbstractImageDownloader;
 class AbstractImageDownloaderPrivate
 {
@@ -66,6 +67,7 @@ private:
     QMap<QNetworkReply *, ImageInfo *> runningReplies;
     QMap<QTimer *, QNetworkReply *> replyTimeouts;
     QList<ImageInfo *> stack;
+    QMimeDatabase *m_mimeDatabase = nullptr;
     int loadedCount;
     Q_DECLARE_PUBLIC(AbstractImageDownloader)
 };

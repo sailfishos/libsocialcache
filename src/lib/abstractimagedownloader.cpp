@@ -22,7 +22,7 @@
 #include <QtCore/QDir>
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QStandardPaths>
-#include <QtGui/QImageReader>
+#include <QtCore/QMimeDatabase>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
@@ -55,6 +55,7 @@ AbstractImageDownloaderPrivate::AbstractImageDownloaderPrivate(AbstractImageDown
 
 AbstractImageDownloaderPrivate::~AbstractImageDownloaderPrivate()
 {
+    delete m_mimeDatabase;
 }
 
 void AbstractImageDownloaderPrivate::manageStack()
@@ -168,8 +169,11 @@ void AbstractImageDownloader::slotFinished()
         readData(info, reply);
         info->file.close();
 
-        QImageReader reader(fileName);
-        if (reader.canRead()) {
+        if (!d->m_mimeDatabase) {
+            d->m_mimeDatabase = new QMimeDatabase;
+        }
+        QMimeType mimeType = d->m_mimeDatabase->mimeTypeForFile(fileName);
+        if (mimeType.name().startsWith(QStringLiteral("image/"))) {
             dbQueueImage(info->url, info->requestsData.first(), fileName);
             Q_FOREACH (const QVariantMap &metadata, info->requestsData) {
                 emit imageDownloaded(info->url, fileName, metadata);
