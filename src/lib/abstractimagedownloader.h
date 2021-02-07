@@ -69,7 +69,6 @@ protected:
     QScopedPointer<AbstractImageDownloaderPrivate> d_ptr;
 
 private Q_SLOTS:
-    void readyRead();
     void slotFinished();
     void timedOut();
 

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 Lucien Xu <sfietkonstantin@free.fr>
+ * Copyright (C) 2013 - 2021 Jolla Pty Ltd.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,6 +24,7 @@
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QStandardPaths>
 #include <QtCore/QMimeDatabase>
+#include <QtGui/QImage>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
@@ -55,7 +57,6 @@ AbstractImageDownloaderPrivate::AbstractImageDownloaderPrivate(AbstractImageDown
 
 AbstractImageDownloaderPrivate::~AbstractImageDownloaderPrivate()
 {
-    delete m_mimeDatabase;
 }
 
 void AbstractImageDownloaderPrivate::manageStack()
@@ -70,8 +71,8 @@ void AbstractImageDownloaderPrivate::manageStack()
             url = info->redirectUrl;
         }
 
-        info->file.setFileName(q->outputFile(url, info->requestsData.first()));
-        QDir parentDir = QFileInfo(info->file.fileName()).dir();
+        info->fileName = q->outputFile(url, info->requestsData.first());
+        QDir parentDir = QFileInfo(info->fileName).dir();
         if (!parentDir.exists()) {
             parentDir.mkpath(".");
         }
@@ -97,31 +98,57 @@ void AbstractImageDownloaderPrivate::manageStack()
     }
 }
 
-static void readData(ImageInfo *info, QNetworkReply *reply)
+static bool writeImageData(const QString &localFilePath, QNetworkReply *reply)
 {
     qint64 bytesAvailable = reply->bytesAvailable();
     if (bytesAvailable == 0) {
         qWarning() << Q_FUNC_INFO << "No image data available";
-        return;
+        return false;
     }
 
-    QByteArray buf = reply->readAll();
-    info->file.write(buf);
-}
+    const QByteArray imageData = reply->readAll();
 
-void AbstractImageDownloader::readyRead()
-{
-    Q_D(AbstractImageDownloader);
-
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    if (!reply) {
-        return;
+    static const QMimeDatabase mimeDatabase;
+    const QMimeType dataMimeType = mimeDatabase.mimeTypeForData(imageData);
+    if (!dataMimeType.name().startsWith(QStringLiteral("image/"))) {
+        qWarning() << "Downloaded file is not an image, mime type is" << dataMimeType.name();
+        return false;
     }
 
-    ImageInfo *info = d->runningReplies.value(reply);
-    if (info) {
-        readData(info, reply);
+    const QMimeType localFilePathMimeType = mimeDatabase.mimeTypesForFileName(localFilePath).value(0);
+
+    if (localFilePathMimeType != dataMimeType) {
+        // The destination file path has a file extension that does not match the mime type of the
+        // downloaded content.
+        const QFileInfo fileInfo(localFilePath);
+        qWarning() << "Downloaded file" << fileInfo.fileName() << "has type" << dataMimeType.name()
+                   << "instead of expected" << localFilePathMimeType.name()
+                   << ", converting to" << localFilePathMimeType.name();
+
+        QImage image;
+        if (!image.loadFromData(imageData)) {
+            qWarning() << "Unable to read downloaded image data";
+            return false;
+        }
+
+        // QImage::save() will convert the image to the correct mime type when writing to file.
+        if (!image.save(localFilePath)) {
+            qWarning() << "Unable to save downloaded image data to file:" << localFilePath;
+            return false;
+        }
+    } else {
+        // The downloaded content matches the mime type of the destination file path, so save the
+        // content directly to the file without converting it.
+        QFile file(localFilePath);
+        if (!file.open(QFile::WriteOnly)) {
+            qWarning() << "Unable to write downloaded image data to file:" << localFilePath;
+            return false;
+        }
+        file.write(imageData);
+        file.close();
     }
+
+    return true;
 }
 
 void AbstractImageDownloader::slotFinished()
@@ -156,31 +183,13 @@ void AbstractImageDownloader::slotFinished()
         d->stack.append(info);
         d->manageStack();
     } else {
-        if (!info->file.open(QIODevice::ReadWrite)) {
-            qWarning() << Q_FUNC_INFO << "Failed to open file for write" << info->file.errorString();
+        if (writeImageData(info->fileName, reply)) {
+            dbQueueImage(info->url, info->requestsData.first(), info->fileName);
             Q_FOREACH (const QVariantMap &metadata, info->requestsData) {
-                emit imageDownloaded(info->url, QString(), metadata);
-            }
-            d->manageStack();
-            return;
-        }
-
-        const QString fileName = info->file.fileName();
-        readData(info, reply);
-        info->file.close();
-
-        if (!d->m_mimeDatabase) {
-            d->m_mimeDatabase = new QMimeDatabase;
-        }
-        QMimeType mimeType = d->m_mimeDatabase->mimeTypeForFile(fileName);
-        if (mimeType.name().startsWith(QStringLiteral("image/"))) {
-            dbQueueImage(info->url, info->requestsData.first(), fileName);
-            Q_FOREACH (const QVariantMap &metadata, info->requestsData) {
-                emit imageDownloaded(info->url, fileName, metadata);
+                emit imageDownloaded(info->url, info->fileName, metadata);
             }
         } else {
             // the file is not in image format.
-            info->file.remove(fileName); // remove artifacts.
             Q_FOREACH (const QVariantMap &metadata, info->requestsData) {
                 emit imageDownloaded(info->url, QString(), metadata);
             }
