@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 Lucien XU <sfietkonstantin@free.fr>
+ * Copyright (C) 2013 - 2021 Jolla Pty Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -45,12 +46,13 @@ struct ImageInfo
     ImageInfo(const QString &url, const QVariantMap &data) : url(url), requestsData(QList<QVariantMap>() << data) {}
 
     QString url;
-    QFile file;
+    QString fileName;
     QString redirectUrl;
     QList<QVariantMap> requestsData;
 };
 
 
+class QMimeDatabase;
 class AbstractImageDownloader;
 class AbstractImageDownloaderPrivate
 {
