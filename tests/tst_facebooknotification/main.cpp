@@ -50,7 +50,7 @@ private slots:
     // damaging.
     void initTestCase()
     {
-        QStandardPaths::enableTestMode(true);
+        QStandardPaths::setTestModeEnabled(true);
 
         QDir dir (PRIVILEGED_DATA_DIR);
         dir.removeRecursively();
@@ -236,7 +236,11 @@ private slots:
     {
         QDateTime time1 = QDateTime::currentDateTime();
         QDateTime time2;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+        time2.setSecsSinceEpoch(time1.toSecsSinceEpoch() - 10 * 24 * 60 * 60);
+#else
         time2.setTime_t(time1.toTime_t() - 10 * 24 * 60 * 60);
+#endif
 
         const QString id1 = QLatin1String("id1");
         const QString id2 = QLatin1String("id2");

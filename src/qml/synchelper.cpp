@@ -18,8 +18,13 @@
  */
 
 #include "synchelper.h"
-#include <buteosyncfw5/SyncCommonDefs.h>
-#include <buteosyncfw5/ProfileManager.h>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    #include <buteosyncfw6/SyncCommonDefs.h>
+    #include <buteosyncfw6/ProfileManager.h>
+#else
+    #include <buteosyncfw5/SyncCommonDefs.h>
+    #include <buteosyncfw5/ProfileManager.h>
+#endif
 
 SyncHelper::SyncHelper(QObject *parent) :
     QObject(parent), QQmlParserStatus(), m_socialNetwork(SocialSyncInterface::InvalidSocialNetwork)

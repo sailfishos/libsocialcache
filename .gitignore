@@ -1,0 +1,24 @@
+.qmake.stash
+*.o
+moc_*
+*.moc
+Makefile
+*.prl
+*.so
+*.so.*
+*.qm
+
+
+# project specific
+src/qml/socialcache.ts
+src/lib/pkgconfig/
+tests/tst_abstractsocialcachedatabase/tst_abstractsocialcachedatabase
+tests/tst_dropboximage/tst_dropboximage
+tests/tst_facebookcontact/tst_facebookcontact
+tests/tst_facebookimage/tst_facebookimage
+tests/tst_facebooknotification/tst_facebooknotification
+tests/tst_facebookpost/tst_facebookpost
+tests/tst_onedriveimage/tst_onedriveimage
+tests/tst_socialimage/tst_socialimage
+tests/tst_socialnetworksync/tst_socialnetworksync
+tests/tst_twitterpost/tst_twitterpost

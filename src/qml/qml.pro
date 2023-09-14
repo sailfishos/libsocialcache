@@ -18,7 +18,7 @@ CONFIG(nodeps):{
 DEFINES += NO_DEPS
 } else {
 CONFIG += link_pkgconfig
-PKGCONFIG += buteosyncfw5 libsailfishkeyprovider
+PKGCONFIG += buteosyncfw$${QT_MAJOR_VERSION} libsailfishkeyprovider
 HEADERS += synchelper.h \
     keyproviderhelper.h
 SOURCES += synchelper.cpp \
@@ -84,7 +84,9 @@ QMAKE_EXTRA_TARGETS += qmltypes
 TS_FILE = $$OUT_PWD/socialcache.ts
 EE_QM = $$OUT_PWD/socialcache_eng_en.qm
 
-ts.commands += lupdate $$PWD/.. -ts $$TS_FILE
+qtPrepareTool(LUPDATE, lupdate)
+
+ts.commands += $$LUPDATE $$PWD/.. -ts $$TS_FILE
 ts.CONFIG += no_check_exist no_link
 ts.output = $$TS_FILE
 ts.input = ..
@@ -93,8 +95,10 @@ ts_install.files = $$TS_FILE
 ts_install.path = /usr/share/translations/source
 ts_install.CONFIG += no_check_exist
 
+qtPrepareTool(LRELEASE, lrelease)
+
 # should add -markuntranslated "-" when proper translations are in place (or for testing)
-engineering_english.commands += lrelease -idbased $$TS_FILE -qm $$EE_QM
+engineering_english.commands += $${LRELEASE} -idbased $$TS_FILE -qm $$EE_QM
 engineering_english.CONFIG += no_check_exist no_link
 engineering_english.depends = ts
 engineering_english.input = $$TS_FILE

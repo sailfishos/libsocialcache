@@ -468,8 +468,13 @@ QList<DropboxImage::ConstPtr> DropboxImagesDatabasePrivate::queryImages(const QS
     while (query.next()) {
         data.append(DropboxImage::create(query.value(0).toString(), query.value(1).toString(),
                                           query.value(2).toString(),
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                          QDateTime::fromSecsSinceEpoch(query.value(3).toUInt()),
+                                          QDateTime::fromSecsSinceEpoch(query.value(4).toUInt()),
+#else
                                           QDateTime::fromTime_t(query.value(3).toUInt()),
                                           QDateTime::fromTime_t(query.value(4).toUInt()),
+#endif
                                           query.value(5).toString(),
                                           query.value(6).toInt(), query.value(7).toInt(),
                                           query.value(8).toString(), query.value(9).toString(),
@@ -551,7 +556,11 @@ DropboxUser::ConstPtr DropboxImagesDatabase::user(const QString &userId) const
 
     DropboxUser::ConstPtr user = DropboxUser::create(
                                 query.value(0).toString(),
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                QDateTime::fromSecsSinceEpoch(query.value(1).toUInt()),
+#else
                                 QDateTime::fromTime_t(query.value(1).toUInt()),
+#endif
                                 query.value(2).toString());
 
     query.finish();
@@ -597,7 +606,11 @@ QList<DropboxUser::ConstPtr> DropboxImagesDatabasePrivate::queryUsers() const
 
     while (query.next()) {
         data.append(DropboxUser::create(query.value(0).toString(),
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                         QDateTime::fromSecsSinceEpoch(query.value(1).toUInt()),
+#else
                                          QDateTime::fromTime_t(query.value(1).toUInt()),
+#endif
                                          query.value(2).toString(), query.value(3).toInt()));
     }
     return data;
@@ -674,8 +687,13 @@ DropboxAlbum::ConstPtr DropboxImagesDatabase::album(const QString &albumId) cons
     }
 
     DropboxAlbum::ConstPtr album = DropboxAlbum::create(query.value(0).toString(),  query.value(1).toString(),
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                 QDateTime::fromSecsSinceEpoch(query.value(2).toUInt()),
+                                 QDateTime::fromSecsSinceEpoch(query.value(3).toUInt()),
+#else
                                  QDateTime::fromTime_t(query.value(2).toUInt()),
                                  QDateTime::fromTime_t(query.value(3).toUInt()),
+#endif
                                  query.value(4).toString(), query.value(5).toInt(),
                                  query.value(6).toString());
 
@@ -738,8 +756,13 @@ QList<DropboxAlbum::ConstPtr> DropboxImagesDatabasePrivate::queryAlbums(const QS
 
     while (query.next()) {
         data.append(DropboxAlbum::create(query.value(0).toString(), query.value(1).toString(),
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                          QDateTime::fromSecsSinceEpoch(query.value(2).toUInt()),
+                                          QDateTime::fromSecsSinceEpoch(query.value(3).toUInt()),
+#else
                                           QDateTime::fromTime_t(query.value(2).toUInt()),
                                           QDateTime::fromTime_t(query.value(3).toUInt()),
+#endif
                                           query.value(4).toString(), query.value(5).toInt(),
                                           query.value(6).toString()));
     }
@@ -817,8 +840,13 @@ DropboxImage::ConstPtr DropboxImagesDatabase::image(const QString &imageId) cons
 
     return DropboxImage::create(query.value(0).toString(),  query.value(1).toString(),
                                  query.value(2).toString(),
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                 QDateTime::fromSecsSinceEpoch(query.value(3).toUInt()),
+                                 QDateTime::fromSecsSinceEpoch(query.value(4).toUInt()),
+#else
                                  QDateTime::fromTime_t(query.value(3).toUInt()),
                                  QDateTime::fromTime_t(query.value(4).toUInt()),
+#endif
                                  query.value(5).toString(),
                                  query.value(6).toInt(), query.value(7).toInt(),
                                  query.value(8).toString(), query.value(9).toString(),
@@ -1169,7 +1197,11 @@ bool DropboxImagesDatabase::write()
 
         Q_FOREACH (const DropboxUser::ConstPtr &user, insertUsers) {
             userIds.append(user->userId());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+            updatedTimes.append(user->updatedTime().toSecsSinceEpoch());
+#else
             updatedTimes.append(user->updatedTime().toTime_t());
+#endif
             usernames.append(user->userName());
         }
 
@@ -1194,8 +1226,13 @@ bool DropboxImagesDatabase::write()
         Q_FOREACH (const DropboxAlbum::ConstPtr &album, insertAlbums) {
             albumIds.append(album->albumId());
             userIds.append(album->userId());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+            createdTimes.append(album->createdTime().toSecsSinceEpoch());
+            updatedTimes.append(album->updatedTime().toSecsSinceEpoch());
+#else
             createdTimes.append(album->createdTime().toTime_t());
             updatedTimes.append(album->updatedTime().toTime_t());
+#endif
             albumNames.append(album->albumName());
             imageCounts.append(album->imageCount());
             hashes.append(album->hash());
@@ -1229,8 +1266,13 @@ bool DropboxImagesDatabase::write()
             imageIds.append(image->imageId());
             albumIds.append(image->albumId());
             userIds.append(image->userId());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+            createdTimes.append(image->createdTime().toSecsSinceEpoch());
+            updatedTimes.append(image->updatedTime().toSecsSinceEpoch());
+#else
             createdTimes.append(image->createdTime().toTime_t());
             updatedTimes.append(image->updatedTime().toTime_t());
+#endif
             imageNames.append(image->imageName());
             widths.append(image->width());
             heights.append(image->height());

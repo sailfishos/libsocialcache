@@ -265,7 +265,11 @@ QList<VKNotification::ConstPtr> VKNotificationsDatabase::notifications()
                                            query.value(4).toString(),                       // fromName
                                            query.value(5).toString(),                       // fromIcon
                                            query.value(6).toString(),                       // toId
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                           QDateTime::fromSecsSinceEpoch(query.value(7).toInt()))); // createdTime
+#else
                                            QDateTime::fromTime_t(query.value(7).toInt()))); // createdTime
+#endif
     }
 
     return data;
@@ -335,7 +339,11 @@ bool VKNotificationsDatabase::write()
                 fromNames.append(notification->fromName());
                 fromIcons.append(notification->fromIcon());
                 toIds.append(notification->toId());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                createdTimes.append(notification->createdTime().toSecsSinceEpoch());
+#else
                 createdTimes.append(notification->createdTime().toTime_t());
+#endif
                 types.append(notification->type());
             }
         }

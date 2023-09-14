@@ -22,7 +22,12 @@
 #include <QtCore/QObject>
 #include <QtQml/QQmlParserStatus>
 #include "socialsyncinterface.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <buteosyncfw6/SyncClientInterface.h>
+#else
 #include <buteosyncfw5/SyncClientInterface.h>
+#endif
 
 class SyncHelper : public QObject, public QQmlParserStatus
 {

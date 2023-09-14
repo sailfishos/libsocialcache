@@ -405,7 +405,11 @@ bool AbstractSocialPostCacheDatabase::read()
         QString body = postQuery.value(2).toString();
         int timestamp = postQuery.value(3).toInt();
         SocialPost::Ptr post = SocialPost::create(identifier, name, body,
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                                  QDateTime::fromSecsSinceEpoch(timestamp));
+#else
                                                   QDateTime::fromTime_t(timestamp));
+#endif
 
         imageQuery.bindValue(":postId", identifier);
 
@@ -579,7 +583,11 @@ bool AbstractSocialPostCacheDatabase::write()
         posts.postIds.append(postId);
         posts.names.append(post->name());
         posts.bodies.append(post->body());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+        posts.timestamps.append(post->timestamp().toSecsSinceEpoch());
+#else
         posts.timestamps.append(post->timestamp().toTime_t());
+#endif
 
         const QMap<int, SocialPostImage::ConstPtr> postImages = post->allImages();
         typedef QMap<int, SocialPostImage::ConstPtr>::const_iterator iterator;
