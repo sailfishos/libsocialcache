@@ -207,7 +207,11 @@ QList<SocialImage::ConstPtr> SocialImagesDatabasePrivate::queryImages(int accoun
     query.bindValue(":accountId", accountId);
 
     if (olderThan.isValid()) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+        query.bindValue(":createdTime", olderThan.toSecsSinceEpoch());
+#else
         query.bindValue(":createdTime", olderThan.toTime_t());
+#endif
     }
 
     if (!query.exec()) {
@@ -219,8 +223,13 @@ QList<SocialImage::ConstPtr> SocialImagesDatabasePrivate::queryImages(int accoun
         data.append(SocialImage::create(query.value(0).toInt(),                             // accountId
                                         query.value(1).toString(),                          // imageUrl
                                         query.value(2).toString(),                          // imageFile
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                        QDateTime::fromSecsSinceEpoch(query.value(3).toUInt()),     // createdTime
+                                        QDateTime::fromSecsSinceEpoch(query.value(4).toUInt()),     // expires
+#else
                                         QDateTime::fromTime_t(query.value(3).toUInt()),     // createdTime
                                         QDateTime::fromTime_t(query.value(4).toUInt()),     // expires
+#endif
                                         query.value(5).toString()));                        // imageId
     }
 
@@ -233,7 +242,11 @@ QList<SocialImage::ConstPtr> SocialImagesDatabasePrivate::queryExpired(int accou
 
     QList<SocialImage::ConstPtr> data;
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+    int currentTime = QDateTime::currentDateTime().toSecsSinceEpoch();
+#else
     int currentTime = QDateTime::currentDateTime().toTime_t();
+#endif
 
     QString queryString = QLatin1String("SELECT accountId, "
                                         "imageUrl, imageFile, createdTime, expires, imageId "
@@ -253,8 +266,13 @@ QList<SocialImage::ConstPtr> SocialImagesDatabasePrivate::queryExpired(int accou
         data.append(SocialImage::create(query.value(0).toInt(),                             // accountId
                                         query.value(1).toString(),                          // imageUrl
                                         query.value(2).toString(),                          // imageFile
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                        QDateTime::fromSecsSinceEpoch(query.value(3).toUInt()),     // createdTime
+                                        QDateTime::fromSecsSinceEpoch(query.value(4).toUInt()),     // expires
+#else
                                         QDateTime::fromTime_t(query.value(3).toUInt()),     // createdTime
                                         QDateTime::fromTime_t(query.value(4).toUInt()),     // expires
+#endif
                                         query.value(5).toString()));                        // imageId
     }
 
@@ -312,8 +330,13 @@ SocialImage::ConstPtr SocialImagesDatabase::image(const QString &imageUrl) const
     return SocialImage::create(query.value(0).toInt(),                           // accountId
                                query.value(1).toString(),                        // imageUrl
                                query.value(2).toString(),                        // imageFile
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                               QDateTime::fromSecsSinceEpoch(query.value(3).toUInt()),   // createdTime
+                               QDateTime::fromSecsSinceEpoch(query.value(4).toUInt()),   // expires
+#else
                                QDateTime::fromTime_t(query.value(3).toUInt()),   // createdTime
                                QDateTime::fromTime_t(query.value(4).toUInt()),   // expires
+#endif
                                query.value(5).toString());                       // imageId
 }
 
@@ -347,8 +370,13 @@ SocialImage::ConstPtr SocialImagesDatabase::imageById(const QString &imageId) co
     return SocialImage::create(query.value(0).toInt(),                           // accountId
                                query.value(1).toString(),                        // imageUrl
                                query.value(2).toString(),                        // imageFile
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                               QDateTime::fromSecsSinceEpoch(query.value(3).toUInt()),   // createdTime
+                               QDateTime::fromSecsSinceEpoch(query.value(4).toUInt()),   // expires
+#else
                                QDateTime::fromTime_t(query.value(3).toUInt()),   // createdTime
                                QDateTime::fromTime_t(query.value(4).toUInt()),   // expires
+#endif
                                query.value(5).toString());                       // imageId
 }
 
@@ -521,8 +549,13 @@ bool SocialImagesDatabase::write()
             accountIds.append(image->accountId());
             imageUrls.append(image->imageUrl());
             imageFiles.append(image->imageFile());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+            createdTimes.append(image->createdTime().toSecsSinceEpoch());
+            expireTimes.append(image->expires().toSecsSinceEpoch());
+#else
             createdTimes.append(image->createdTime().toTime_t());
             expireTimes.append(image->expires().toTime_t());
+#endif
             imageIds.append(image->imageId());
         }
 

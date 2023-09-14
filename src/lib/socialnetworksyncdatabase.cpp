@@ -119,7 +119,11 @@ QDateTime SocialNetworkSyncDatabase::lastSyncTimestamp(const QString &serviceNam
         return QDateTime();
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+    QDateTime dateTime = QDateTime::fromSecsSinceEpoch(query.value(0).toUInt());
+#else
     QDateTime dateTime = QDateTime::fromTime_t(query.value(0).toUInt());
+#endif
     return dateTime;
 }
 
@@ -169,7 +173,11 @@ bool SocialNetworkSyncDatabase::write()
             serviceNames.append(data->serviceName);
             dataTypes.append(data->dataType);
             accountIds.append(data->accountId);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+            timestamps.append(data->timestamp.toSecsSinceEpoch());
+#else
             timestamps.append(data->timestamp.toTime_t());
+#endif
 
             delete data;
         }

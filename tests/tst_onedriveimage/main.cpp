@@ -51,7 +51,7 @@ private slots:
     // damaging.
     void initTestCase()
     {
-        QStandardPaths::enableTestMode(true);
+        QStandardPaths::setTestModeEnabled(true);
 
         QDir dir (PRIVILEGED_DATA_DIR);
         dir.removeRecursively();
@@ -82,7 +82,11 @@ private slots:
         QVERIFY(query.exec());
         QVERIFY(query.next());
         QCOMPARE(query.value(0).toString(), QLatin1String("a"));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+        QCOMPARE(query.value(1).toUInt(), time1.toSecsSinceEpoch());
+#else
         QCOMPARE(query.value(1).toUInt(), time1.toTime_t());
+#endif
         QCOMPARE(query.value(2).toString(), QLatin1String("c"));
         QCOMPARE(query.value(3).toInt(), 1);
         QVERIFY(!query.next());

@@ -353,8 +353,13 @@ QList<FacebookNotification::ConstPtr> FacebookNotificationsDatabase::notificatio
         data.append(FacebookNotification::create(query.value(0).toString(),                      // facebookId
                                                  query.value(2).toString(),                      // from
                                                  query.value(3).toString(),                      // to
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                                                 QDateTime::fromSecsSinceEpoch(query.value(4).toInt()),  // createdTime
+                                                 QDateTime::fromSecsSinceEpoch(query.value(5).toInt()),  // updatedTime
+#else
                                                  QDateTime::fromTime_t(query.value(4).toInt()),  // createdTime
                                                  QDateTime::fromTime_t(query.value(5).toInt()),  // updatedTime
+#endif
                                                  query.value(6).toString(),                      // title
                                                  query.value(7).toString(),                      // link
                                                  query.value(8).toString(),                      // application
@@ -446,8 +451,13 @@ bool FacebookNotificationsDatabase::write()
                 accountIds.append(notification->accountId());
                 fromStrings.append(notification->from());
                 toStrings.append(notification->to());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                createdTimes.append(notification->createdTime().toSecsSinceEpoch());
+                updatedTimes.append(notification->updatedTime().toSecsSinceEpoch());
+#else
                 createdTimes.append(notification->createdTime().toTime_t());
                 updatedTimes.append(notification->updatedTime().toTime_t());
+#endif
                 titles.append(notification->title());
                 links.append(notification->link());
                 applications.append(notification->application());
@@ -481,7 +491,11 @@ bool FacebookNotificationsDatabase::write()
     if (d->purgeTimeLimit > 0) {
         QVariantList limits;
         // purge notifications older than expirationTime in days
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+        const quint32 limit = QDateTime::currentDateTime().toSecsSinceEpoch() - d->purgeTimeLimit * 24 * 60 * 60;
+#else
         const quint32 limit = QDateTime::currentDateTime().toTime_t() - d->purgeTimeLimit * 24 * 60 * 60;
+#endif
         limits.append(limit);
         query = prepare(QStringLiteral("DELETE FROM notifications WHERE updatedTime < :timeLimit"));
         query.bindValue(QStringLiteral(":timeLimit"), limits);

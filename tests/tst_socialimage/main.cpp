@@ -62,7 +62,7 @@ private slots:
     // damaging.
     void initTestCase()
     {
-        QStandardPaths::enableTestMode(true);
+        QStandardPaths::setTestModeEnabled(true);
 
         QDir dir (PRIVILEGED_DATA_DIR);
         dir.removeRecursively();
@@ -78,10 +78,17 @@ private slots:
 
         // Database stores time_t values so convert to time_t first to get even seconds,
         // otherwise the tests below will fail to mismatching milliseconds.
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+        int exp1 = QDateTime::currentDateTime().addDays(5).toSecsSinceEpoch();
+        int exp2 = QDateTime::currentDateTime().addDays(10).toSecsSinceEpoch();
+        QDateTime expires1 (QDateTime::fromSecsSinceEpoch(exp1));
+        QDateTime expires2 (QDateTime::fromSecsSinceEpoch(exp2));
+#else
         int exp1 = QDateTime::currentDateTime().addDays(5).toTime_t();
         int exp2 = QDateTime::currentDateTime().addDays(10).toTime_t();
         QDateTime expires1 (QDateTime::fromTime_t(exp1));
         QDateTime expires2 (QDateTime::fromTime_t(exp2));
+#endif
 
         QString id1("id1");
         QString id2("id2");
@@ -248,11 +255,19 @@ private slots:
         QCOMPARE(image->imageId(), id2);
 
         // test expires
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+        int currentExp = QDateTime::currentDateTime().addSecs(-1).toSecsSinceEpoch();
+#else
         int currentExp = QDateTime::currentDateTime().addSecs(-1).toTime_t();
+#endif
         database.addImage(
                     account2,
                     QLatin1String("file:///t5.jpg"), QLatin1String("file:///5.jpg"),
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+                    time2, QDateTime::fromSecsSinceEpoch(currentExp));
+#else
                     time2, QDateTime::fromTime_t(currentExp));
+#endif
         database.commit();
         database.wait();
         QCOMPARE(database.writeStatus(), AbstractSocialCacheDatabase::Finished);
@@ -268,7 +283,11 @@ private slots:
         QCOMPARE(image->imageUrl(), QString("file:///t5.jpg"));
         QCOMPARE(image->imageFile(), QString("file:///5.jpg"));
         QCOMPARE(image->createdTime(), time2);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 8, 0)
+        QCOMPARE(image->expires(), QDateTime::fromSecsSinceEpoch(currentExp));
+#else
         QCOMPARE(image->expires(), QDateTime::fromTime_t(currentExp));
+#endif
     }
 
     void cleanupTestCase()

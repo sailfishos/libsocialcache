@@ -50,7 +50,7 @@ private slots:
     // damaging.
     void initTestCase()
     {
-        QStandardPaths::enableTestMode(true);
+        QStandardPaths::setTestModeEnabled(true);
 
         QDir dir (PRIVILEGED_DATA_DIR);
         dir.removeRecursively();

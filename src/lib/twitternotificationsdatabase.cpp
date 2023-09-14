@@ -166,7 +166,12 @@ bool TwitterNotificationsDatabase::write()
             QVariantList followerIdsForQuery;
             QVariantList accountIdsForQuery;
             QSet<QString> followerIdsSet = setFollowerIds[accountId];
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+            QList<QString> followerIdsList(followerIdsSet.begin(), followerIdsSet.end());
+            Q_FOREACH (const QString &fid, followerIdsList) {
+#else
             Q_FOREACH (const QString &fid, followerIdsSet.toList()) {
+#endif
                 followerIdsForQuery.append(fid);
                 accountIdsForQuery.append(accountId);
             }

@@ -297,43 +297,43 @@ VKPostsDatabase::Post::Ptr VKPostsDatabase::Post::create(const SocialPost::Const
 
     const QVariantMap &extra = socialPost->extra();
 
-    vkPost->fromId = extra.value(POST_FROM_ID_KEY).toInt();
-    vkPost->toId = extra.value(POST_TO_ID_KEY).toInt();
-    vkPost->replyOwnerId = extra.value(POST_REPLY_OWNER_ID_KEY).toInt();
-    vkPost->replyPostId = extra.value(POST_REPLY_POST_ID_KEY).toInt();
-    vkPost->friendsOnly = extra.value(POST_FRIENDS_ONLY_KEY).toBool();
-    vkPost->signerId = extra.value(POST_SIGNER_ID_KEY).toInt();
+    vkPost->fromId = QVariant(extra.value(POST_FROM_ID_KEY)).toInt();
+    vkPost->toId = QVariant(extra.value(POST_TO_ID_KEY)).toInt();
+    vkPost->replyOwnerId = QVariant(extra.value(POST_REPLY_OWNER_ID_KEY)).toInt();
+    vkPost->replyPostId = QVariant(extra.value(POST_REPLY_POST_ID_KEY)).toInt();
+    vkPost->friendsOnly = QVariant(extra.value(POST_FRIENDS_ONLY_KEY)).toBool();
+    vkPost->signerId = QVariant(extra.value(POST_SIGNER_ID_KEY)).toInt();
     vkPost->link = extra.value(POST_LINK_KEY).toString();
 
-    vkPost->comments.count = extra.value(COMMENT_COUNT_KEY).toInt();
-    vkPost->comments.userCanComment = extra.value(COMMENT_ALLOW_KEY).toBool();
+    vkPost->comments.count = QVariant(extra.value(COMMENT_COUNT_KEY)).toInt();
+    vkPost->comments.userCanComment = QVariant(extra.value(COMMENT_ALLOW_KEY)).toBool();
 
-    vkPost->likes.count = extra.value(LIKE_COUNT_KEY).toInt();
-    vkPost->likes.userLikes = extra.value(LIKE_BY_USER).toBool();
-    vkPost->likes.userCanLike = extra.value(LIKE_ALLOW_KEY).toBool();
-    vkPost->likes.userCanPublish = extra.value(LIKE_ALLOW_PUBLISH_KEY).toBool();
+    vkPost->likes.count = QVariant(extra.value(LIKE_COUNT_KEY)).toInt();
+    vkPost->likes.userLikes = QVariant(extra.value(LIKE_BY_USER)).toBool();
+    vkPost->likes.userCanLike = QVariant(extra.value(LIKE_ALLOW_KEY)).toBool();
+    vkPost->likes.userCanPublish = QVariant(extra.value(LIKE_ALLOW_PUBLISH_KEY)).toBool();
 
-    vkPost->reposts.count = extra.value(REPOST_COUNT_KEY).toInt();
-    vkPost->reposts.userReposted = extra.value(REPOST_BY_USER_KEY).toBool();
+    vkPost->reposts.count = QVariant(extra.value(REPOST_COUNT_KEY)).toInt();
+    vkPost->reposts.userReposted = QVariant(extra.value(REPOST_BY_USER_KEY)).toBool();
 
     vkPost->postSource.type = extra.value(POST_SOURCE_TYPE_KEY).toString();
     vkPost->postSource.data = extra.value(POST_SOURCE_DATA_KEY).toString();
 
-    vkPost->geo.placeId = extra.value(GEO_PLACE_ID_KEY).toInt();
+    vkPost->geo.placeId = QVariant(extra.value(GEO_PLACE_ID_KEY)).toInt();
     vkPost->geo.title = extra.value(GEO_TITLE_KEY).toString();
     vkPost->geo.type = extra.value(GEO_TYPE_KEY).toString();
-    vkPost->geo.countryId = extra.value(GEO_COUNTRY_ID_KEY).toInt();
-    vkPost->geo.cityId = extra.value(GEO_CITY_ID_KEY).toInt();
+    vkPost->geo.countryId = QVariant(extra.value(GEO_COUNTRY_ID_KEY)).toInt();
+    vkPost->geo.cityId = QVariant(extra.value(GEO_CITY_ID_KEY)).toInt();
     vkPost->geo.address = extra.value(GEO_ADDRESS_KEY).toString();
-    vkPost->geo.showMap = extra.value(GEO_SHOWMAP_KEY).toBool();
+    vkPost->geo.showMap = QVariant(extra.value(GEO_SHOWMAP_KEY)).toBool();
 
     vkPost->copyPost.createdTime = extra.value(COPIED_POST_CREATED_TIME_KEY).toDateTime();
     vkPost->copyPost.type = extra.value(COPIED_POST_TYPE_KEY).toString();
-    vkPost->copyPost.ownerId = extra.value(COPIED_POST_OWNER_ID_KEY).toInt();
+    vkPost->copyPost.ownerId = QVariant(extra.value(COPIED_POST_OWNER_ID_KEY)).toInt();
     vkPost->copyPost.ownerName = extra.value(COPIED_POST_OWNER_NAME_KEY).toString();
     vkPost->copyPost.ownerAvatar = extra.value(COPIED_POST_OWNER_AVATAR_KEY).toString();
-    vkPost->copyPost.postId = extra.value(COPIED_POST_POST_ID_KEY).toInt();
-    vkPost->copyPost.text = extra.value(COPIED_POST_TEXT_KEY).toInt();
+    vkPost->copyPost.postId = QVariant(extra.value(COPIED_POST_POST_ID_KEY)).toInt();
+    vkPost->copyPost.text = extra.value(COPIED_POST_TEXT_KEY).toString();
     vkPost->copyPost.photo = extra.value(COPIED_POST_PHOTO_KEY).toString();
     vkPost->copyPost.video = extra.value(COPIED_POST_VIDEO_KEY).toString();
     vkPost->copyPost.link = extra.value(COPIED_POST_LINK_KEY).toString();
