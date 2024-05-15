@@ -159,7 +159,7 @@ void SocialImageDownloader::notifyImageCached(const QString &imageUrl,
     QList< QPointer<QObject> > ongoingCalls = d->m_ongoingCalls.values(imageUrl);
 
     if (imageFile.isEmpty()) {
-        qWarning() << "SocialImageDownloader: failed to download " << imageFile;
+        qWarning() << "SocialImageDownloader: failed to download " << imageUrl;
         for (int i = 0; i < ongoingCalls.count(); ++i) {
            if (ongoingCalls.at(i) != 0) {
                QMetaObject::invokeMethod(ongoingCalls.at(i).data(), "downloadError");
@@ -195,7 +195,7 @@ void SocialImageDownloader::notifyImageCached(const QString &imageUrl,
 }
 
 QString SocialImageDownloader::outputFile(const QString &url,
-                                           const QVariantMap &data) const
+                                          const QVariantMap &data) const
 {
     Q_UNUSED(data);
 

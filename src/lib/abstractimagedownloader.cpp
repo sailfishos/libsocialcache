@@ -112,6 +112,10 @@ static bool writeImageData(const QString &localFilePath, QNetworkReply *reply)
     const QMimeType dataMimeType = mimeDatabase.mimeTypeForData(imageData);
     if (!dataMimeType.name().startsWith(QStringLiteral("image/"))) {
         qWarning() << "Downloaded file is not an image, mime type is" << dataMimeType.name();
+        if (dataMimeType.name() == "text/plain") {
+            // might be some error explanation
+            qDebug() << "Got text instead:" << imageData.left(200);
+        }
         return false;
     }
 
