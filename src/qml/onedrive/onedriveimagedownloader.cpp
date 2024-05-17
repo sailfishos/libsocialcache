@@ -34,7 +34,7 @@
 
 static const char *MODEL_KEY = "model";
 static const char *URL_KEY = "url";
-static const char *TYPE_PHOTO = "photo";
+// static const char *TYPE_PHOTO = "photo";
 
 OneDriveImageDownloader::UncachedImage::UncachedImage()
 {}

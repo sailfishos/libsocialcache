@@ -31,8 +31,8 @@
 static const char *DB_NAME = "facebook.db";
 static const int VERSION = 3;
 
-static const char *PICTURE_FILE_KEY = "pictureFile";
-static const char *COVER_FILE_KEY = "coverFile";
+//static const char *PICTURE_FILE_KEY = "pictureFile";
+//static const char *COVER_FILE_KEY = "coverFile";
 
 struct FacebookContactPrivate
 {

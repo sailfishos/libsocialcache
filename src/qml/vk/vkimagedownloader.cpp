@@ -97,6 +97,7 @@ QString VKImageDownloader::outputFile(const QString &url, const QVariantMap &dat
 
 void VKImageDownloader::dbQueueImage(const QString &url, const QVariantMap &data, const QString &file)
 {
+    Q_UNUSED(url);
     Q_D(VKImageDownloader);
     QString photo_id = data.value(QLatin1String(PHOTOID_KEY)).toString();
     QString album_id = data.value(QLatin1String(ALBUMID_KEY)).toString();
