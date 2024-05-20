@@ -43,7 +43,7 @@ public:
     Q_INVOKABLE void removeFromRecentlyUsedById(const QString &imageId);
 
 protected:
-    QString outputFile(const QString &url, const QVariantMap &data) const;
+    QString outputFile(const QString &url, const QVariantMap &data, const QString &mimeType) const override;
 
 private Q_SLOTS:
     void notifyImageCached(const QString &url, const QString &path, const QVariantMap &metadata);

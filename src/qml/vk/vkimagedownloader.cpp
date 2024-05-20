@@ -84,15 +84,16 @@ void VKImageDownloader::invokeSpecificModelCallback(const QString &url, const QS
     }
 }
 
-QString VKImageDownloader::outputFile(const QString &url, const QVariantMap &data) const
+QString VKImageDownloader::outputFile(const QString &url, const QVariantMap &data, const QString &mimeType) const
 {
     Q_UNUSED(url);
+    Q_UNUSED(mimeType);
     QString identifier = QStringLiteral("%1-%2-%3-%4")
                          .arg(data.value(QLatin1String(OWNERID_KEY)).toString())
                          .arg(data.value(QLatin1String(ALBUMID_KEY)).toString())
                          .arg(data.value(QLatin1String(PHOTOID_KEY)).toString())
                          .arg(data.value(QLatin1String(TYPE_KEY)).toString());
-    return makeOutputFile(SocialSyncInterface::VK, SocialSyncInterface::Images, identifier);
+    return makeOutputFile(SocialSyncInterface::VK, SocialSyncInterface::Images, identifier, QString());
 }
 
 void VKImageDownloader::dbQueueImage(const QString &url, const QVariantMap &data, const QString &file)

@@ -43,7 +43,7 @@ public:
     void removeModelFromHash(VKImageCacheModel *model);
 
 protected:
-    QString outputFile(const QString &url, const QVariantMap &data) const;
+    QString outputFile(const QString &url, const QVariantMap &data, const QString &mimeType) const override;
     void dbQueueImage(const QString &url, const QVariantMap &data, const QString &file);
     void dbWrite();
 

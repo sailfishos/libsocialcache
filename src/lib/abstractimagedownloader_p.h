@@ -43,10 +43,10 @@
 
 struct ImageInfo
 {
-    ImageInfo(const QString &url, const QVariantMap &data) : url(url), requestsData(QList<QVariantMap>() << data) {}
+    ImageInfo(const QString &url, const QVariantMap &data)
+        : url(url), requestsData(QList<QVariantMap>() << data) {}
 
     QString url;
-    QString fileName;
     QString redirectUrl;
     QList<QVariantMap> requestsData;
 };
@@ -65,6 +65,8 @@ protected:
 
 private:
     void manageStack();
+    bool writeImageData(ImageInfo *imageInfo, QNetworkReply *reply, QString *outFileName);
+
     QMap<QNetworkReply *, ImageInfo *> runningReplies;
     QMap<QTimer *, QNetworkReply *> replyTimeouts;
     QList<ImageInfo *> stack;

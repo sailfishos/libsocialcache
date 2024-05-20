@@ -82,9 +82,11 @@ void FacebookImageDownloader::invokeSpecificModelCallback(const QString &url, co
 }
 
 QString FacebookImageDownloader::outputFile(const QString &url,
-                                                        const QVariantMap &data) const
+                                            const QVariantMap &data,
+                                            const QString &mimeType) const
 {
     Q_UNUSED(url);
+    Q_UNUSED(mimeType); // TODO: use?
 
     // We create the identifier by appending the type to the real identifier
     QString identifier = data.value(QLatin1String(IDENTIFIER_KEY)).toString();
@@ -99,7 +101,7 @@ QString FacebookImageDownloader::outputFile(const QString &url,
 
     identifier.append(typeString);
 
-    return makeOutputFile(SocialSyncInterface::Facebook, SocialSyncInterface::Images, identifier);
+    return makeOutputFile(SocialSyncInterface::Facebook, SocialSyncInterface::Images, identifier, QString());
 }
 
 void FacebookImageDownloader::dbQueueImage(const QString &url, const QVariantMap &data,
