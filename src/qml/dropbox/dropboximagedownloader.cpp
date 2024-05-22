@@ -100,7 +100,7 @@ QString DropboxImageDownloader::outputFile(const QString &url,
 
     identifier.append(typeString);
 
-    return makeOutputFile(SocialSyncInterface::Dropbox, SocialSyncInterface::Images, identifier, mimetype);
+    return makeOutputFile(SocialSyncInterface::Dropbox, SocialSyncInterface::Images, identifier, mimeType);
 }
 
 void DropboxImageDownloader::dbQueueImage(const QString &url, const QVariantMap &data,
