@@ -34,7 +34,7 @@
 
 static const char *MODEL_KEY = "model";
 static const char *URL_KEY = "url";
-static const char *TYPE_PHOTO = "photo";
+// static const char *TYPE_PHOTO = "photo";
 
 OneDriveImageDownloader::UncachedImage::UncachedImage()
 {}
@@ -128,9 +128,11 @@ void OneDriveImageDownloader::invokeSpecificModelCallback(const QString &url, co
 }
 
 QString OneDriveImageDownloader::outputFile(const QString &url,
-                                            const QVariantMap &data) const
+                                            const QVariantMap &data,
+                                            const QString &mimeType) const
 {
     Q_UNUSED(url);
+    Q_UNUSED(mimeType); // TODO: use?
 
     // We create the identifier by appending the type to the real identifier
     QString identifier = data.value(QLatin1String(IDENTIFIER_KEY)).toString();
@@ -145,7 +147,7 @@ QString OneDriveImageDownloader::outputFile(const QString &url,
 
     identifier.append(typeString);
 
-    return makeOutputFile(SocialSyncInterface::OneDrive, SocialSyncInterface::Images, identifier);
+    return makeOutputFile(SocialSyncInterface::OneDrive, SocialSyncInterface::Images, identifier, QString());
 }
 
 void OneDriveImageDownloader::dbQueueImage(const QString &url, const QVariantMap &data, const QString &file)

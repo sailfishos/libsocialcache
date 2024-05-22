@@ -263,6 +263,7 @@ void VKImageCacheModel::refresh()
 // performance reasons.
 void VKImageCacheModel::imageDownloaded(const QString &url, const QString &path, const QVariantMap &imageData)
 {
+    Q_UNUSED(url);
     Q_D(VKImageCacheModel);
 
     if (path.isEmpty()) {

@@ -127,7 +127,8 @@ void SocialImageDownloader::imageFile(const QString &imageUrl,
     data.insert(QStringLiteral("accountId"), accountId);
     data.insert(QStringLiteral("expiresInDays"), expiresInDays);
     data.insert(QStringLiteral("imageId"), imageId);
-    if (accessToken.length()) data.insert(QStringLiteral("accessToken"), accessToken);
+    if (accessToken.length())
+        data.insert(QStringLiteral("accessToken"), accessToken);
     queue(imageUrl, data);
     return;
 }
@@ -195,7 +196,8 @@ void SocialImageDownloader::notifyImageCached(const QString &imageUrl,
 }
 
 QString SocialImageDownloader::outputFile(const QString &url,
-                                          const QVariantMap &data) const
+                                          const QVariantMap &data,
+                                          const QString &mimeType) const
 {
     Q_UNUSED(data);
 
@@ -210,8 +212,12 @@ QString SocialImageDownloader::outputFile(const QString &url,
         ending = parts.last();
     }
     if (ending.isEmpty()) {
-        // assume jpg
-        ending = "jpg";
+        if (mimeType == QStringLiteral("image/png")) {
+            ending = QStringLiteral("png");
+        } else {
+            // assume jpg
+            ending = "jpg";
+        }
     }
 
     QCryptographicHash hash (QCryptographicHash::Md5);

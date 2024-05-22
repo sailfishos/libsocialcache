@@ -71,12 +71,6 @@ void AbstractImageDownloaderPrivate::manageStack()
             url = info->redirectUrl;
         }
 
-        info->fileName = q->outputFile(url, info->requestsData.first());
-        QDir parentDir = QFileInfo(info->fileName).dir();
-        if (!parentDir.exists()) {
-            parentDir.mkpath(".");
-        }
-
         if (QNetworkReply *reply = q->createReply(url, info->requestsData.first())) {
             QTimer *timer = new QTimer(q);
             timer->setInterval(60000);
@@ -98,8 +92,9 @@ void AbstractImageDownloaderPrivate::manageStack()
     }
 }
 
-static bool writeImageData(const QString &localFilePath, QNetworkReply *reply)
+bool AbstractImageDownloaderPrivate::writeImageData(ImageInfo *info, QNetworkReply *reply, QString *outFileName)
 {
+    Q_Q(AbstractImageDownloader);
     qint64 bytesAvailable = reply->bytesAvailable();
     if (bytesAvailable == 0) {
         qWarning() << Q_FUNC_INFO << "No image data available";
@@ -117,6 +112,17 @@ static bool writeImageData(const QString &localFilePath, QNetworkReply *reply)
             qDebug() << "Got text instead:" << imageData.left(200);
         }
         return false;
+    }
+
+    QString url = info->url;
+    if (!info->redirectUrl.isEmpty()) {
+        url = info->redirectUrl;
+    }
+
+    QString localFilePath = q->outputFile(url, info->requestsData.first(), dataMimeType.name());
+    QDir parentDir = QFileInfo(localFilePath).dir();
+    if (!parentDir.exists()) {
+        parentDir.mkpath(".");
     }
 
     const QMimeType localFilePathMimeType = mimeDatabase.mimeTypesForFileName(localFilePath).value(0);
@@ -152,6 +158,7 @@ static bool writeImageData(const QString &localFilePath, QNetworkReply *reply)
         file.close();
     }
 
+    *outFileName = localFilePath;
     return true;
 }
 
@@ -187,10 +194,11 @@ void AbstractImageDownloader::slotFinished()
         d->stack.append(info);
         d->manageStack();
     } else {
-        if (writeImageData(info->fileName, reply)) {
-            dbQueueImage(info->url, info->requestsData.first(), info->fileName);
+        QString fileName;
+        if (d->writeImageData(info, reply, &fileName)) {
+            dbQueueImage(info->url, info->requestsData.first(), fileName);
             Q_FOREACH (const QVariantMap &metadata, info->requestsData) {
-                emit imageDownloaded(info->url, info->fileName, metadata);
+                emit imageDownloaded(info->url, fileName, metadata);
             }
         } else {
             // the file is not in image format.
@@ -305,9 +313,34 @@ QNetworkReply *AbstractImageDownloader::createReply(const QString &url, const QV
     return d->networkAccessManager->get(request);
 }
 
+static QString createOutputPath(SocialSyncInterface::DataType dataType,
+                                SocialSyncInterface::SocialNetwork socialNetwork,
+                                const QString &subdir,
+                                const QString &identifier,
+                                const QString &mimetype)
+{
+    QString result = QString(PRIVILEGED_DATA_DIR) + QChar('/') + SocialSyncInterface::dataType(dataType) + QChar('/');
+
+    if (dataType == SocialSyncInterface::Contacts) {
+        result += QStringLiteral("avatars") + QChar('/');
+    }
+
+    result += SocialSyncInterface::socialNetwork(socialNetwork) + QChar('/')
+            + subdir + QChar('/');
+
+    // do we want to support more image types?
+    if (mimetype == QStringLiteral("image/png")) {
+        result += identifier + QStringLiteral(".png");
+    } else {
+        result += identifier + QStringLiteral(".jpg");
+    }
+    return result;
+}
+
 QString AbstractImageDownloader::makeOutputFile(SocialSyncInterface::SocialNetwork socialNetwork,
-                                                 SocialSyncInterface::DataType dataType,
-                                                 const QString &identifier)
+                                                SocialSyncInterface::DataType dataType,
+                                                const QString &identifier,
+                                                const QString &mimetype)
 {
     if (identifier.isEmpty()) {
         return QString();
@@ -317,29 +350,15 @@ QString AbstractImageDownloader::makeOutputFile(SocialSyncInterface::SocialNetwo
     hash.addData(identifier.toUtf8());
     QByteArray hashedIdentifier = hash.result().toHex();
 
-    QString path;
-    if (dataType == SocialSyncInterface::Contacts) {
-        path = QStringLiteral("%1/%2/%3/%4/%5/%6.jpg").arg(PRIVILEGED_DATA_DIR,
-                                                 SocialSyncInterface::dataType(dataType),
-                                                 QStringLiteral("avatars"),
-                                                 SocialSyncInterface::socialNetwork(socialNetwork),
-                                                 QChar(hashedIdentifier.at(0)),
-                                                 identifier);
-    } else {
-        path = QStringLiteral("%1/%2/%3/%4/%5.jpg").arg(PRIVILEGED_DATA_DIR,
-                                                 SocialSyncInterface::dataType(dataType),
-                                                 SocialSyncInterface::socialNetwork(socialNetwork),
-                                                 QChar(hashedIdentifier.at(0)),
-                                                 identifier);
-    }
-
+    QString path = createOutputPath(dataType, socialNetwork, QString(hashedIdentifier.at(0)), identifier, mimetype);
     return path;
 }
 
-QString AbstractImageDownloader::makeOutputFile(SocialSyncInterface::SocialNetwork socialNetwork,
-                                                SocialSyncInterface::DataType dataType,
-                                                const QString &identifier,
-                                                const QString &remoteUrl)
+QString AbstractImageDownloader::makeUrlOutputFile(SocialSyncInterface::SocialNetwork socialNetwork,
+                                                   SocialSyncInterface::DataType dataType,
+                                                   const QString &identifier,
+                                                   const QString &remoteUrl,
+                                                   const QString &mimeType)
 {
     // this function hashes the remote URL in order to increase the
     // chance that a changed remote url will result in resynchronisation
@@ -357,22 +376,7 @@ QString AbstractImageDownloader::makeOutputFile(SocialSyncInterface::SocialNetwo
     idHash.addData(identifier.toUtf8());
     QByteArray hashedId = idHash.result().toHex();
 
-    QString path;
-    if (dataType == SocialSyncInterface::Contacts) {
-        path = QStringLiteral("%1/%2/%3/%4/%5/%6.jpg").arg(PRIVILEGED_DATA_DIR,
-                                                 SocialSyncInterface::dataType(dataType),
-                                                 QStringLiteral("avatars"),
-                                                 SocialSyncInterface::socialNetwork(socialNetwork),
-                                                 QChar(hashedId.at(0)),
-                                                 hashedUrl);
-    } else {
-        path = QStringLiteral("%1/%2/%3/%4/%5.jpg").arg(PRIVILEGED_DATA_DIR,
-                                                 SocialSyncInterface::dataType(dataType),
-                                                 SocialSyncInterface::socialNetwork(socialNetwork),
-                                                 QChar(hashedId.at(0)),
-                                                 hashedUrl);
-    }
-
+    QString path = createOutputPath(dataType, socialNetwork, QString(hashedId.at(0)), hashedUrl, mimeType);
     return path;
 }
 

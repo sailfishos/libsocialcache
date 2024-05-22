@@ -44,16 +44,17 @@ protected:
 
     static QString makeOutputFile(SocialSyncInterface::SocialNetwork socialNetwork,
                                   SocialSyncInterface::DataType dataType,
-                                  const QString &identifier);
-    static QString makeOutputFile(SocialSyncInterface::SocialNetwork socialNetwork,
-                                  SocialSyncInterface::DataType dataType,
                                   const QString &identifier,
-                                  const QString &remoteUrl); // added to retain BC.
-
+                                  const QString &mimeType);
+    static QString makeUrlOutputFile(SocialSyncInterface::SocialNetwork socialNetwork,
+                                     SocialSyncInterface::DataType dataType,
+                                     const QString &identifier,
+                                     const QString &remoteUrl,
+                                     const QString &mimeType);
     virtual QNetworkReply * createReply(const QString &url, const QVariantMap &metadata);
 
     // Output file based on passed data
-    virtual QString outputFile(const QString &url, const QVariantMap &metadata) const = 0;
+    virtual QString outputFile(const QString &url, const QVariantMap &metadata, const QString &mimetype) const = 0;
 
     // Init the database if not initialized
     // used to delay initialization of the database
