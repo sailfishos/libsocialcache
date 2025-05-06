@@ -40,8 +40,8 @@ SocialImageDownloaderPrivate::~SocialImageDownloaderPrivate()
     m_db.wait();
 }
 
-SocialImageDownloader::SocialImageDownloader(QObject *parent) :
-    AbstractImageDownloader(*new SocialImageDownloaderPrivate(this), parent)
+SocialImageDownloader::SocialImageDownloader(QObject *parent)
+    : AbstractImageDownloader(*new SocialImageDownloaderPrivate(this), parent)
 {
     Q_D(SocialImageDownloader);
 
