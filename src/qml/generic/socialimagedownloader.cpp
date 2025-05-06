@@ -26,6 +26,8 @@
 #include <QtDebug>
 #include <QUrl>
 #include <QFileInfo>
+#include <QMimeType>
+#include <QMimeDatabase>
 
 SocialImageDownloaderPrivate::SocialImageDownloaderPrivate(SocialImageDownloader *q)
     : AbstractImageDownloaderPrivate(q)
@@ -211,7 +213,11 @@ QString SocialImageDownloader::outputFile(const QString &url,
     if (parts.count() > 1) {
         ending = parts.last();
     }
-    if (ending.isEmpty()) {
+
+    // the url may hint to a name which is not really having a file extension, e.g. '.aspx'
+    // try to come up with a better name on that case.
+    QMimeType urlMime = QMimeDatabase().mimeTypeForUrl(url);
+    if (ending.isEmpty() || !urlMime.name().startsWith(QLatin1String("image/"))) {
         if (mimeType == QStringLiteral("image/png")) {
             ending = QStringLiteral("png");
         } else {
