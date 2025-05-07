@@ -44,10 +44,10 @@ TwitterPostsModel::TwitterPostsModel(QObject *parent)
 {
     Q_D(TwitterPostsModel);
 
-     connect(&d->database, &AbstractSocialPostCacheDatabase::postsChanged,
-             this, &TwitterPostsModel::postsChanged);
-     connect(&d->database, SIGNAL(accountIdFilterChanged()),
-             this, SIGNAL(accountIdFilterChanged()));
+    connect(&d->database, &AbstractSocialPostCacheDatabase::postsChanged,
+            this, &TwitterPostsModel::postsChanged);
+    connect(&d->database, SIGNAL(accountIdFilterChanged()),
+            this, SIGNAL(accountIdFilterChanged()));
 }
 
 QHash<int, QByteArray> TwitterPostsModel::roleNames() const

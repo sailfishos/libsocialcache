@@ -26,6 +26,7 @@
 
 class QNetworkReply;
 class AbstractImageDownloaderPrivate;
+
 class AbstractImageDownloader : public QObject
 {
     Q_OBJECT

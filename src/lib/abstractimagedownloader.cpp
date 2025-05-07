@@ -80,7 +80,8 @@ void AbstractImageDownloaderPrivate::manageStack()
             timer->start();
             replyTimeouts.insert(timer, reply);
             reply->setProperty("timeoutTimer", QVariant::fromValue<QTimer*>(timer));
-            QObject::connect(reply, SIGNAL(finished()), q, SLOT(slotFinished())); // For some reason, this fixes an issue with oopp sync plugins
+            // For some reason, this fixes an issue with oopp sync plugins
+            QObject::connect(reply, SIGNAL(finished()), q, SLOT(slotFinished()));
             runningReplies.insert(reply, info);
         } else {
             // emit signal.  Empty file signifies error.
@@ -325,8 +326,7 @@ static QString createOutputPath(SocialSyncInterface::DataType dataType,
         result += QStringLiteral("avatars") + QChar('/');
     }
 
-    result += SocialSyncInterface::socialNetwork(socialNetwork) + QChar('/')
-            + subdir + QChar('/');
+    result += SocialSyncInterface::socialNetwork(socialNetwork) + QChar('/') + subdir + QChar('/');
 
     // do we want to support more image types?
     if (mimetype == QStringLiteral("image/png")) {
