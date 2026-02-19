@@ -21,7 +21,6 @@
 #include "abstractsocialcachemodel_p.h"
 #include "vkpostsdatabase.h"
 #include <QtCore/QDebug>
-#include "postimagehelper_p.h"
 
 static const char *POST_LINK_KEY = "post_link_key";
 
@@ -129,11 +128,14 @@ void VKPostsModel::postsChanged()
 
     Q_FOREACH (const SocialPost::ConstPtr &post, postsData) {
         QMap<int, QVariant> eventMap;
-        eventMap.insert(VKPostsModel::VkId, post->identifier());
-        eventMap.insert(VKPostsModel::Name, post->name());
-        eventMap.insert(VKPostsModel::Body, post->body());
-        eventMap.insert(VKPostsModel::Timestamp, post->timestamp());
-        eventMap.insert(VKPostsModel::Icon, post->icon());
+        appendCommonPostFields(&eventMap, post,
+                               VKPostsModel::VkId,
+                               VKPostsModel::Name,
+                               VKPostsModel::Body,
+                               VKPostsModel::Timestamp,
+                               VKPostsModel::Icon,
+                               VKPostsModel::Images,
+                               VKPostsModel::Accounts);
         eventMap.insert(VKPostsModel::Link, post->extra().value(POST_LINK_KEY));
 
         eventMap.insert(VKPostsModel::RepostOwnerName, post->extra().value(COPIED_POST_OWNER_NAME_KEY));
@@ -148,24 +150,13 @@ void VKPostsModel::postsChanged()
         QStringList imageUrls = post->extra().value(COPIED_POST_PHOTO_KEY).toString().split(QStringLiteral(","));
         Q_FOREACH (const QString url, imageUrls) {
             if (!url.isEmpty()) {
-                SocialPostImage::Ptr repostImage = SocialPostImage::create(url, SocialPostImage::Photo);
-                QVariantMap tmp = createImageData(repostImage);
+                QVariantMap tmp;
+                tmp.insert(QStringLiteral("url"), url);
+                tmp.insert(QStringLiteral("type"), QStringLiteral("photo"));
                 repostImages.append(tmp);
             }
         }
         eventMap.insert(VKPostsModel::RepostImages, repostImages);
-
-        QVariantList images;
-        Q_FOREACH (const SocialPostImage::ConstPtr &image, post->images()) {
-            images.append(createImageData(image));
-        }
-        eventMap.insert(VKPostsModel::Images, images);
-
-        QVariantList accountsVariant;
-        Q_FOREACH (int account, post->accounts()) {
-            accountsVariant.append(account);
-        }
-        eventMap.insert(VKPostsModel::Accounts, accountsVariant);
         data.append(eventMap);
     }
 

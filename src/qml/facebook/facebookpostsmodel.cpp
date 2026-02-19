@@ -21,7 +21,6 @@
 #include "abstractsocialcachemodel_p.h"
 #include "facebookpostsdatabase.h"
 #include <QtCore/QDebug>
-#include "postimagehelper_p.h"
 
 class FacebookPostsModelPrivate: public AbstractSocialCacheModelPrivate
 {
@@ -84,17 +83,14 @@ void FacebookPostsModel::postsChanged()
 
     Q_FOREACH (const SocialPost::ConstPtr &post, postsData) {
         QMap<int, QVariant> eventMap;
-        eventMap.insert(FacebookPostsModel::FacebookId, post->identifier());
-        eventMap.insert(FacebookPostsModel::Name, post->name());
-        eventMap.insert(FacebookPostsModel::Body, post->body());
-        eventMap.insert(FacebookPostsModel::Timestamp, post->timestamp());
-        eventMap.insert(FacebookPostsModel::Icon, post->icon());
-
-        QVariantList images;
-        Q_FOREACH (const SocialPostImage::ConstPtr &image, post->images()) {
-            images.append(createImageData(image));
-        }
-        eventMap.insert(FacebookPostsModel::Images, images);
+        appendCommonPostFields(&eventMap, post,
+                               FacebookPostsModel::FacebookId,
+                               FacebookPostsModel::Name,
+                               FacebookPostsModel::Body,
+                               FacebookPostsModel::Timestamp,
+                               FacebookPostsModel::Icon,
+                               FacebookPostsModel::Images,
+                               FacebookPostsModel::Accounts);
 
         eventMap.insert(FacebookPostsModel::AttachmentName, d->database.attachmentName(post));
         eventMap.insert(FacebookPostsModel::AttachmentCaption, d->database.attachmentCaption(post));
@@ -104,12 +100,6 @@ void FacebookPostsModel::postsChanged()
         eventMap.insert(FacebookPostsModel::AllowLike, d->database.allowLike(post));
         eventMap.insert(FacebookPostsModel::AllowComment, d->database.allowComment(post));
         eventMap.insert(FacebookPostsModel::ClientId, d->database.clientId(post));
-
-        QVariantList accountsVariant;
-        Q_FOREACH (int account, post->accounts()) {
-            accountsVariant.append(account);
-        }
-        eventMap.insert(FacebookPostsModel::Accounts, accountsVariant);
         data.append(eventMap);
     }
 

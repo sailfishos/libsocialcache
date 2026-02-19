@@ -22,6 +22,7 @@
 #include "abstractsocialcachedatabase.h"
 #include <QtCore/QSharedPointer>
 #include <QtCore/QDateTime>
+#include <QtCore/QStringList>
 #include <QtCore/QVariantMap>
 
 class SocialPostImagePrivate;
@@ -80,6 +81,18 @@ public:
     void setImages(const QMap<int, SocialPostImage::ConstPtr> &images);
     QVariantMap extra() const;
     void setExtra(const QVariantMap &extra);
+    QString extraString(const QString &key,
+                        const QString &defaultValue = QString()) const;
+    int extraInt(const QString &key,
+                 int defaultValue = 0) const;
+    bool extraBool(const QString &key,
+                   bool defaultValue = false) const;
+    QString extraString(const QStringList &keys,
+                        const QString &defaultValue = QString()) const;
+    int extraInt(const QStringList &keys,
+                 int defaultValue = 0) const;
+    bool extraBool(const QStringList &keys,
+                   bool defaultValue = false) const;
     QList<int> accounts() const;
     void setAccounts(const QList<int> &accounts);
 

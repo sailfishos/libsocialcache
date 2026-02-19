@@ -21,11 +21,13 @@
 #define ABSTRACTSOCIALCACHEMODEL_H
 
 #include <QtCore/QAbstractListModel>
+#include <QtCore/QSharedPointer>
 
 typedef QMap<int, QVariant> SocialCacheModelRow;
 typedef QList<SocialCacheModelRow> SocialCacheModelData;
 
 class AbstractSocialCacheModelPrivate;
+class SocialPost;
 
 class AbstractSocialCacheModel : public QAbstractListModel
 {
@@ -58,6 +60,15 @@ protected:
     // Methods used to update the model in the C++ side
     void updateData(const SocialCacheModelData &data);
     void updateRow(int row, const SocialCacheModelRow &data);
+    void appendCommonPostFields(SocialCacheModelRow *rowData,
+                                const QSharedPointer<const SocialPost> &post,
+                                int identifierRole,
+                                int nameRole,
+                                int bodyRole,
+                                int timestampRole,
+                                int iconRole,
+                                int imagesRole,
+                                int accountsRole);
 
     explicit AbstractSocialCacheModel(AbstractSocialCacheModelPrivate &dd, QObject *parent = 0);
     QScopedPointer<AbstractSocialCacheModelPrivate> d_ptr;

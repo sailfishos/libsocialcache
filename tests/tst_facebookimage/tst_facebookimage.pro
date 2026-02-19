@@ -12,6 +12,7 @@ INCLUDEPATH += ../../src/qml/
 HEADERS +=  ../../src/lib/semaphore_p.h \
             ../../src/lib/socialsyncinterface.h \
             ../../src/lib/abstractsocialcachedatabase.h \
+            ../../src/lib/abstractsocialpostcachedatabase.h \
             ../../src/lib/abstractsocialcachedatabase_p.h \
             ../../src/lib/facebookimagesdatabase.h \
             ../../src/lib/abstractimagedownloader.h \
@@ -25,6 +26,7 @@ HEADERS +=  ../../src/lib/semaphore_p.h \
 SOURCES +=  ../../src/lib/semaphore_p.cpp \
             ../../src/lib/socialsyncinterface.cpp \
             ../../src/lib/abstractsocialcachedatabase.cpp \
+            ../../src/lib/abstractsocialpostcachedatabase.cpp \
             ../../src/lib/facebookimagesdatabase.cpp \
             ../../src/lib/abstractimagedownloader.cpp \
             ../../src/qml/abstractsocialcachemodel.cpp \

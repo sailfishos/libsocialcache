@@ -21,7 +21,6 @@
 #include "abstractsocialcachemodel_p.h"
 #include "twitterpostsdatabase.h"
 #include <QtCore/QDebug>
-#include "postimagehelper_p.h"
 
 class TwitterPostsModelPrivate: public AbstractSocialCacheModelPrivate
 {
@@ -96,28 +95,19 @@ void TwitterPostsModel::postsChanged()
     QList<SocialPost::ConstPtr> postsData = d->database.posts();
     Q_FOREACH (const SocialPost::ConstPtr &post, postsData) {
         QMap<int, QVariant> eventMap;
-        eventMap.insert(TwitterPostsModel::TwitterId, post->identifier());
-        eventMap.insert(TwitterPostsModel::Name, post->name());
-        eventMap.insert(TwitterPostsModel::Body, post->body());
-        eventMap.insert(TwitterPostsModel::Timestamp, post->timestamp());
-        eventMap.insert(TwitterPostsModel::Icon, post->icon());
-
-        QVariantList images;
-        Q_FOREACH (const SocialPostImage::ConstPtr &image, post->images()) {
-            images.append(createImageData(image));
-        }
-        eventMap.insert(TwitterPostsModel::Images, images);
+        appendCommonPostFields(&eventMap, post,
+                               TwitterPostsModel::TwitterId,
+                               TwitterPostsModel::Name,
+                               TwitterPostsModel::Body,
+                               TwitterPostsModel::Timestamp,
+                               TwitterPostsModel::Icon,
+                               TwitterPostsModel::Images,
+                               TwitterPostsModel::Accounts);
 
         eventMap.insert(TwitterPostsModel::ScreenName, d->database.screenName(post));
         eventMap.insert(TwitterPostsModel::Retweeter, d->database.retweeter(post));
         eventMap.insert(TwitterPostsModel::ConsumerKey, d->database.consumerKey(post));
         eventMap.insert(TwitterPostsModel::ConsumerSecret, d->database.consumerSecret(post));
-
-        QVariantList accountsVariant;
-        Q_FOREACH (int account, post->accounts()) {
-            accountsVariant.append(account);
-        }
-        eventMap.insert(TwitterPostsModel::Accounts, accountsVariant);
         data.append(eventMap);
     }
 

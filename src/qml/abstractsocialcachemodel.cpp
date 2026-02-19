@@ -19,11 +19,44 @@
 
 #include "abstractsocialcachemodel.h"
 #include "abstractsocialcachemodel_p.h"
+#include "abstractsocialpostcachedatabase.h"
 
 #include <synchronizelists_p.h>
 
 #include <QtCore/QDebug>
 #include <QtCore/QMutexLocker>
+
+static QVariantMap socialPostImageData(const SocialPostImage::ConstPtr &image)
+{
+    QVariantMap data;
+    if (image.isNull()) {
+        return data;
+    }
+
+    data.insert(QStringLiteral("url"), image->url());
+    data.insert(QStringLiteral("type"), image->type() == SocialPostImage::Video
+                ? QStringLiteral("video") : QStringLiteral("photo"));
+
+    return data;
+}
+
+static QVariantList socialPostImageDataList(const QList<SocialPostImage::ConstPtr> &images)
+{
+    QVariantList list;
+    Q_FOREACH (const SocialPostImage::ConstPtr &image, images) {
+        list.append(socialPostImageData(image));
+    }
+    return list;
+}
+
+static QVariantList socialPostAccountIdList(const QList<int> &accounts)
+{
+    QVariantList list;
+    Q_FOREACH (int account, accounts) {
+        list.append(account);
+    }
+    return list;
+}
 
 template <> bool compareIdentity<SocialCacheModelRow>(
         const SocialCacheModelRow &item, const SocialCacheModelRow &reference)
@@ -187,4 +220,41 @@ void AbstractSocialCacheModel::updateRow(int row, const SocialCacheModelRow &dat
         d->m_data[row].insert(key, data.value(key));
     }
     emit dataChanged(index(row), index(row));
+}
+
+void AbstractSocialCacheModel::appendCommonPostFields(SocialCacheModelRow *rowData,
+                                                      const SocialPost::ConstPtr &post,
+                                                      int identifierRole,
+                                                      int nameRole,
+                                                      int bodyRole,
+                                                      int timestampRole,
+                                                      int iconRole,
+                                                      int imagesRole,
+                                                      int accountsRole)
+{
+    if (!rowData || post.isNull()) {
+        return;
+    }
+
+    if (identifierRole >= 0) {
+        rowData->insert(identifierRole, post->identifier());
+    }
+    if (nameRole >= 0) {
+        rowData->insert(nameRole, post->name());
+    }
+    if (bodyRole >= 0) {
+        rowData->insert(bodyRole, post->body());
+    }
+    if (timestampRole >= 0) {
+        rowData->insert(timestampRole, post->timestamp());
+    }
+    if (iconRole >= 0) {
+        rowData->insert(iconRole, post->icon());
+    }
+    if (imagesRole >= 0) {
+        rowData->insert(imagesRole, socialPostImageDataList(post->images()));
+    }
+    if (accountsRole >= 0) {
+        rowData->insert(accountsRole, socialPostAccountIdList(post->accounts()));
+    }
 }

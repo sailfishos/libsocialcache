@@ -29,7 +29,6 @@ SOURCES += synchelper.cpp \
 HEADERS += \
     abstractsocialcachemodel.h \
     abstractsocialcachemodel_p.h \
-    postimagehelper_p.h \
     synchronizelists_p.h \
     facebook/facebookimagecachemodel.h \
     facebook/facebookimagedownloader.h \

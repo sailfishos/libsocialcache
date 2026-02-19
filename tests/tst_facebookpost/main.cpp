@@ -165,6 +165,40 @@ private slots:
         QCOMPARE(posts.count(), 0);
     }
 
+    void socialPostExtraAccessors()
+    {
+        QVariantMap extra;
+        extra.insert(QLatin1String("string"), QLatin1String("value"));
+        extra.insert(QLatin1String("int"), 42);
+        extra.insert(QLatin1String("bool"), true);
+        extra.insert(QLatin1String("empty"), QString());
+        extra.insert(QLatin1String("null"), QVariant());
+
+        SocialPost::ConstPtr post = SocialPost::create(QLatin1String("id"),
+                                                       QLatin1String("name"),
+                                                       QLatin1String("body"),
+                                                       QDateTime(),
+                                                       QMap<int, SocialPostImage::ConstPtr>(),
+                                                       extra,
+                                                       QList<int>());
+
+        QCOMPARE(post->extraString(QLatin1String("string")), QLatin1String("value"));
+        QCOMPARE(post->extraString(QLatin1String("missing"), QLatin1String("fallback")), QLatin1String("fallback"));
+        QCOMPARE(post->extraString(QStringList() << QLatin1String("missing") << QLatin1String("string")),
+                 QLatin1String("value"));
+        QCOMPARE(post->extraString(QStringList() << QLatin1String("empty") << QLatin1String("missing"),
+                                   QLatin1String("fallback")),
+                 QLatin1String("fallback"));
+
+        QCOMPARE(post->extraInt(QLatin1String("int")), 42);
+        QCOMPARE(post->extraInt(QLatin1String("missing"), 7), 7);
+        QCOMPARE(post->extraInt(QStringList() << QLatin1String("missing") << QLatin1String("int")), 42);
+
+        QCOMPARE(post->extraBool(QLatin1String("bool")), true);
+        QCOMPARE(post->extraBool(QLatin1String("missing"), false), false);
+        QCOMPARE(post->extraBool(QStringList() << QLatin1String("missing") << QLatin1String("bool")), true);
+    }
+
     void cleanupTestCase()
     {
         // Do the same cleanups

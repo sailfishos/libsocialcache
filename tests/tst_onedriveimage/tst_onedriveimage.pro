@@ -13,6 +13,7 @@ INCLUDEPATH += ../../src/qml/onedrive
 HEADERS +=  ../../src/lib/semaphore_p.h \
             ../../src/lib/socialsyncinterface.h \
             ../../src/lib/abstractsocialcachedatabase.h \
+            ../../src/lib/abstractsocialpostcachedatabase.h \
             ../../src/lib/abstractsocialcachedatabase_p.h \
             ../../src/lib/onedriveimagesdatabase.h \
             ../../src/qml/onedrive/onedriveimagecachemodel.h \
@@ -25,6 +26,7 @@ HEADERS +=  ../../src/lib/semaphore_p.h \
 SOURCES +=  ../../src/lib/semaphore_p.cpp \
             ../../src/lib/socialsyncinterface.cpp \
             ../../src/lib/abstractsocialcachedatabase.cpp \
+            ../../src/lib/abstractsocialpostcachedatabase.cpp \
             ../../src/lib/onedriveimagesdatabase.cpp \
             ../../src/qml/onedrive/onedriveimagecachemodel.cpp \
             ../../src/qml/onedrive/onedriveimagedownloader.cpp \
