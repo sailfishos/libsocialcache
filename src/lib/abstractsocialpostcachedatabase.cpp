@@ -190,6 +190,77 @@ void SocialPost::setExtra(const QVariantMap &extra)
     d->extra = extra;
 }
 
+QString SocialPost::extraString(const QString &key, const QString &defaultValue) const
+{
+    Q_D(const SocialPost);
+    const QVariant value = d->extra.value(key);
+    if (!value.isValid() || value.isNull()) {
+        return defaultValue;
+    }
+
+    return value.toString();
+}
+
+int SocialPost::extraInt(const QString &key, int defaultValue) const
+{
+    Q_D(const SocialPost);
+    bool ok = false;
+    const int parsed = d->extra.value(key).toInt(&ok);
+    return ok ? parsed : defaultValue;
+}
+
+bool SocialPost::extraBool(const QString &key, bool defaultValue) const
+{
+    Q_D(const SocialPost);
+    const QVariant value = d->extra.value(key);
+    if (!value.isValid() || value.isNull()) {
+        return defaultValue;
+    }
+
+    return value.toBool();
+}
+
+QString SocialPost::extraString(const QStringList &keys, const QString &defaultValue) const
+{
+    Q_FOREACH (const QString &key, keys) {
+        const QString value = extraString(key);
+        if (!value.isEmpty()) {
+            return value;
+        }
+    }
+    return defaultValue;
+}
+
+int SocialPost::extraInt(const QStringList &keys, int defaultValue) const
+{
+    Q_D(const SocialPost);
+    Q_FOREACH (const QString &key, keys) {
+        const QVariant value = d->extra.value(key);
+        if (!value.isValid() || value.isNull()) {
+            continue;
+        }
+        bool ok = false;
+        const int parsed = value.toInt(&ok);
+        if (ok) {
+            return parsed;
+        }
+    }
+    return defaultValue;
+}
+
+bool SocialPost::extraBool(const QStringList &keys, bool defaultValue) const
+{
+    Q_D(const SocialPost);
+    Q_FOREACH (const QString &key, keys) {
+        const QVariant value = d->extra.value(key);
+        if (!value.isValid() || value.isNull()) {
+            continue;
+        }
+        return value.toBool();
+    }
+    return defaultValue;
+}
+
 QList<int> SocialPost::accounts() const
 {
     Q_D(const SocialPost);
