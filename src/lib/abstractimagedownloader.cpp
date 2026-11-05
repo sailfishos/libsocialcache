@@ -28,6 +28,7 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
+#include <QtCore/QUrl>
 
 #include <QtDebug>
 
@@ -67,11 +68,24 @@ void AbstractImageDownloaderPrivate::manageStack()
         ImageInfo *info = stack.takeLast();
 
         QString url = info->url;
+        QVariantMap requestData = info->requestsData.first();
         if (!info->redirectUrl.isEmpty()) {
             url = info->redirectUrl;
+            // Do not forward the access token to another host: pre-authenticated
+            // download locations (e.g. OneDrive personal content) reject requests
+            // that also carry an Authorization header.
+            if (QUrl(url).host() != QUrl(info->url).host()) {
+                for (QVariantMap::iterator it = requestData.begin(); it != requestData.end();) {
+                    if (it.key().startsWith(QLatin1String("accessToken"))) {
+                        it = requestData.erase(it);
+                    } else {
+                        ++it;
+                    }
+                }
+            }
         }
 
-        if (QNetworkReply *reply = q->createReply(url, info->requestsData.first())) {
+        if (QNetworkReply *reply = q->createReply(url, requestData)) {
             QTimer *timer = new QTimer(q);
             timer->setInterval(60000);
             timer->setSingleShot(true);

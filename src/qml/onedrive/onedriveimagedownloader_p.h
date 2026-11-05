@@ -42,6 +42,7 @@ public:
     QSet<OneDriveImageCacheModel*> m_connectedModels;
     QMutex m_cacheMutex;
     QMap<int, QString> m_accessTokens;
+    QMap<int, QList<OneDriveImageDownloader::UncachedImage> > m_pendingImages; // waiting for an access token
     int m_optimalThumbnailSize;
     QMap<QString, QMap<QNetworkReply*, QTimer *> > m_networkReplyTimeouts;
 

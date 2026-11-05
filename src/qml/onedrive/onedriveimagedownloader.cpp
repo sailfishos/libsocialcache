@@ -18,6 +18,9 @@
  */
 
 #include "onedriveimagedownloader.h"
+
+#include <QtCore/QUrl>
+#include <QtCore/QSet>
 #include "onedriveimagedownloader_p.h"
 #include "onedriveimagedownloaderconstants_p.h"
 
@@ -179,17 +182,38 @@ void OneDriveImageDownloader::cacheImages(QList<OneDriveImageDownloader::Uncache
 {
     Q_D(OneDriveImageDownloader);
 
+    QSet<int> tokenRequests;
     Q_FOREACH (const UncachedImage& image, images) {
-        // no need for access token for thumbnail images, else
-        // emit accessTokenRequested(accountId); would be needed.
+        // Pre-authenticated thumbnail urls need no access token. Graph urls
+        // (e.g. /me/drive/items/<id>/thumbnails/0/medium/content) do; they
+        // redirect to a pre-authenticated location, to which the token is
+        // not forwarded.
+        QString accessToken;
+        if (QUrl(image.thumbnailUrl).host() == QLatin1String("graph.microsoft.com")) {
+            QMutexLocker locker(&d->m_cacheMutex);
+            accessToken = d->m_accessTokens.value(image.accountId);
+            if (accessToken.isEmpty()) {
+                d->m_pendingImages[image.accountId].append(image);
+                tokenRequests.insert(image.accountId);
+                continue;
+            }
+        }
+
         Q_FOREACH (QVariant modelPtr, image.connectedModels) {
             QVariantMap metadata;
             metadata.insert(QLatin1String(TYPE_KEY), (int)OneDriveImageDownloader::ThumbnailImage);
             metadata.insert(QLatin1String(IDENTIFIER_KEY), image.imageId);
             metadata.insert(QLatin1String(URL_KEY), image.thumbnailUrl);
             metadata.insert(QLatin1String(MODEL_KEY), modelPtr);
+            if (!accessToken.isEmpty()) {
+                metadata.insert(QLatin1String("accessToken"), accessToken);
+            }
             queue(image.thumbnailUrl, metadata);
         }
+    }
+
+    Q_FOREACH (int accountId, tokenRequests) {
+        emit accessTokenRequested(accountId);
     }
 }
 
@@ -197,9 +221,16 @@ void OneDriveImageDownloader::accessTokenRetrieved(const QString &accessToken, i
 {
     Q_D(OneDriveImageDownloader);
 
-    // currently unused, but if we want to support full-size images in future...
-    QMutexLocker locker(&d->m_cacheMutex);
-    d->m_accessTokens.insert(accountId, accessToken);
+    QList<UncachedImage> pending;
+    {
+        QMutexLocker locker(&d->m_cacheMutex);
+        d->m_accessTokens.insert(accountId, accessToken);
+        pending = d->m_pendingImages.take(accountId);
+    }
+
+    if (!pending.isEmpty()) {
+        cacheImages(pending);
+    }
 }
 
 void OneDriveImageDownloader::accessTokenFailed(int accountId)
@@ -207,4 +238,7 @@ void OneDriveImageDownloader::accessTokenFailed(int accountId)
     Q_D(OneDriveImageDownloader);
 
     qWarning() << "Failed to retrieve access token for account:" << accountId;
+
+    QMutexLocker locker(&d->m_cacheMutex);
+    d->m_pendingImages.remove(accountId);
 }
